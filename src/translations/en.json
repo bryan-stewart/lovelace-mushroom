@@ -39,6 +39,18 @@
                     "center": "Center",
                     "justify": "Justify"
                 }
+                            },
+            "action_picker": {
+                "values": {
+                    "default": "Default Action",
+                    "dropdown": "Dropdown",
+                    "more-info": "More Info",
+                    "toggle": "Toggle",
+                    "navigate": "Navigate",
+                    "url": "Url",
+                    "call-service": "Call Service",
+                    "none": "No Action"
+                }
             }
         },
         "card": {
@@ -52,7 +64,8 @@
                 "content_info": "Content",
                 "use_entity_picture": "Use entity picture?",
                 "collapsible_controls": "Collapse controls when off",
-                "icon_animation": "Animate icon when active?"
+                "icon_animation": "Animate icon when active?",
+                "hide_arrow": "Hide arrow"
             },
             "light": {
                 "show_brightness_control": "Brightness control?",
@@ -144,6 +157,18 @@
                     "slider": "Slider",
                     "buttons": "Buttons"
                 }
+                       },
+            "dropdown": {
+                "dropdown-picker": {
+                    "dropdowns": "Dropdowns",
+                    "add": "Add Dropdown",
+                    "edit": "Edit",
+                    "clear": "Clear",
+                    "select": "Select dropdown"
+                }
+            },
+            "sub_element_editor": {
+                "title": "Card editor"
             }
         },
         "chip": {

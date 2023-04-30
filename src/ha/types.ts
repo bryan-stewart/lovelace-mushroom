@@ -195,6 +195,7 @@ export interface HomeAssistant {
     defaultPanel: string;
     moreInfoEntityId: string | null;
     user?: CurrentUser;
+    userData?: any;
     hassUrl(path?): string;
     callService(
         domain: ServiceCallRequest["domain"],

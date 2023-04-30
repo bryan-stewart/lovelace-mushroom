@@ -16,6 +16,7 @@ export function computeDarkMode(hass?: HomeAssistant): boolean {
 }
 export class MushroomBaseElement extends LitElement {
     @property({ attribute: false }) public hass!: HomeAssistant;
+    @property({ attribute: false }) public lovelace!: any;
 
     protected updated(changedProps: PropertyValues): void {
         super.updated(changedProps);

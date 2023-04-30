@@ -4,6 +4,7 @@ import {
     dynamic,
     enums,
     literal,
+    number,
     object,
     optional,
     string,
@@ -55,8 +56,13 @@ const actionConfigStructCustom = type({
     action: literal("fire-dom-event"),
 });
 
+const actionConfigStructDropdown = type({
+    action: literal("dropdown"),
+    dropdown: optional(union([string(), number()])),
+});
+
 export const actionConfigStructType = object({
-    action: enums(["none", "toggle", "more-info", "call-service", "url", "navigate"]),
+    action: enums(["none", "dropdown", "toggle", "more-info", "call-service", "url", "navigate"]),
     confirmation: optional(actionConfigStructConfirmation),
 });
 
@@ -74,6 +80,9 @@ export const actionConfigStruct = dynamic<any>((value) => {
             }
             case "url": {
                 return actionConfigStructUrl;
+            }
+            case "dropdown": {
+                return actionConfigStructDropdown;
             }
         }
     }

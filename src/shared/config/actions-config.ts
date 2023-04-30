@@ -29,3 +29,18 @@ export const computeActionsFormSchema = (actions?: UiAction[]): HaFormSchema[] =
         selector: { "ui-action": { actions } },
     },
 ];
+
+export const computeCustomActionsFormSchema = (config): HaFormSchema[] => [
+    {
+        name: "tap_action",
+        selector: { "mush-action": config },
+    },
+    {
+        name: "hold_action",
+        selector: { "mush-action": config },
+    },
+    {
+        name: "double_tap_action",
+        selector: { "mush-action": config },
+    },
+];
