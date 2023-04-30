@@ -39,6 +39,17 @@
                     "center": "Center",
                     "justify": "Justify"
                 }
+                            },
+            "size_picker": {
+                "values": {
+                    "default": "Default size",
+                    "extra-small": "Extra Small",
+                    "small": "Small",
+                    "medium": "Medium",
+                    "large": "Large",
+                    "extra-large": "Extra Large",
+                    "custom": "Custom"
+                }
             }
         },
         "card": {
@@ -90,7 +101,8 @@
                 "subtitle_tap_action": "Subtitle tap action"
             },
             "chips": {
-                "alignment": "Alignment"
+                "alignment": "Alignment",
+                "size": "Size"
             },
             "weather": {
                 "show_conditions": "Conditions?",

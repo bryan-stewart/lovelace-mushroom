@@ -27,6 +27,14 @@ registerCustomCard({
     description: "Card with chips to display informations",
 });
 
+const ChipSizes = {
+    "extra-small": "24px",
+    small: "28px",
+    medium: "32px",
+    large: "36px",
+    "extra-large": "40px",
+};
+
 @customElement(CHIPS_CARD_NAME)
 export class ChipsCard extends LitElement implements LovelaceCard {
     public static async getConfigElement(): Promise<LovelaceCardEditor> {
@@ -76,9 +84,28 @@ export class ChipsCard extends LitElement implements LovelaceCard {
             alignment = `align-${this._config.alignment}`;
         }
 
+        let iconSize = this._config?.icon_size;
+        if (iconSize) {
+            if (ChipSizes[iconSize]) {
+                iconSize = ChipSizes[iconSize];
+            } else if (+iconSize) {
+                iconSize = (+iconSize < 18 ? 18 : +iconSize > 60 ? 60 : iconSize) + "px";
+            } else {
+                iconSize = undefined;
+            }
+        }
+
         const rtl = computeRTL(this._hass);
 
         return html`
+            ${iconSize
+                ? html`<style>
+                      :host {
+                          --mush-chip-height: ${iconSize};
+                      }
+                  </style>`
+            : ""}
+                
             <ha-card>
                 <div class="chip-container ${alignment}" ?rtl=${rtl}>
                     ${this._config.chips.map((chip) => this.renderChip(chip))}
