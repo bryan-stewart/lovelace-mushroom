@@ -1,4 +1,4 @@
-import { html, nothing } from "lit";
+import { css, CSSResultGroup, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import {
     any,
@@ -8,6 +8,7 @@ import {
     boolean,
     dynamic,
     literal,
+    number,
     object,
     optional,
     string,
@@ -17,6 +18,7 @@ import { actionConfigStruct, fireEvent, HASSDomEvent, LovelaceCardEditor } from 
 import setupCustomlocalize from "../../localize";
 import { lovelaceCardConfigStruct } from "../../shared/config/lovelace-card-config";
 import "../../shared/editor/alignment-picker";
+import "../../shared/editor/size-picker";
 import { MushroomBaseElement } from "../../utils/base-element";
 import { loadHaComponents } from "../../utils/loader";
 import { LovelaceChipConfig } from "../../utils/lovelace/chip/types";
@@ -146,6 +148,7 @@ const cardConfigStruct = assign(
     object({
         chips: array(chipsConfigStruct),
         alignment: optional(string()),
+        icon_size: optional(union([string(), number()])),
     })
 );
 
@@ -207,6 +210,16 @@ export class ChipsCardEditor extends MushroomBaseElement implements LovelaceCard
                     @value-changed=${this._valueChanged}
                 >
                 </mushroom-alignment-picker>
+                <mushroom-size-picker
+                    .label="${customLocalize("editor.card.chips.size")} (${this.hass.localize(
+                        "ui.panel.lovelace.editor.card.config.optional"
+                    )})"
+                    .hass=${this.hass}
+                    .value=${this._config.icon_size}
+                    .configValue=${"icon_size"}
+                    @value-changed=${this._valueChanged}
+                >
+                </mushroom-size-picker>
             </div>
             <mushroom-chips-card-chips-editor
                 .hass=${this.hass}
@@ -299,5 +312,16 @@ export class ChipsCardEditor extends MushroomBaseElement implements LovelaceCard
 
     private _goBack(): void {
         this._subElementEditorConfig = undefined;
+    }
+
+    static get styles(): CSSResultGroup {
+        return [
+            css`
+                .card-config > * {
+                    margin-bottom: 24px;
+                    display: block;
+                }
+            `,
+        ];
     }
 }
