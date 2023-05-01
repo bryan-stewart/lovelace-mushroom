@@ -14,7 +14,7 @@ import { loadHaComponents } from "../../utils/loader";
 import { EditSubElementEvent, SubElementEditorConfig } from "../../utils/lovelace/editor/types";
 import { DROPDOWN_CARD_EDITOR_NAME } from "./const";
 import { DropdownCardConfig, dropdownCardConfigStruct } from "./dropdown-card-config";
-import "./dropdown-card-dropdowns-editor";
+import "../../utils/lovelace/dropdowns-element-editor";
 
 const computeSchema = memoizeOne((icon?: string, dropdowns?: any): HaFormSchema[] => [
     { name: "entity", selector: { entity: {} } },

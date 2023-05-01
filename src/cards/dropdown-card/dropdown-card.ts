@@ -117,17 +117,6 @@ export class DropdownCard extends MushroomBaseCard implements LovelaceCard {
 
         const rtl = computeRTL(this.hass);
 
-        const chips =
-            this._config.chips && this._config.chips.chips.length
-                ? {
-                      ...this._config.chips,
-                      color: this._config.chips.color || "lightblue",
-                      chips: this._config.chips.chips.map((n) => ({
-                          ...n,
-                      })),
-                  }
-                : undefined;
-
         const dropdown =
             this._dropdown != undefined && config.dropdowns
                 ? config.dropdowns[+this._dropdown]

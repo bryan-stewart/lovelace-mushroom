@@ -5,7 +5,7 @@ import type { SortableEvent } from "sortablejs";
 import { fireEvent, LovelaceCardConfig, sortableStyles } from "../../ha";
 import setupCustomlocalize from "../../localize";
 import "../../shared/form/mushroom-select";
-import { MushroomBaseElement } from "../../utils/base-element";
+import { MushroomBaseElement } from "../base-element";
 
 let Sortable;
 
@@ -17,7 +17,7 @@ declare global {
     }
 }
 
-@customElement("mushroom-room-card-dropdowns-editor")
+@customElement("mushroom-dropdowns-editor")
 export class DropdownsCardEditorDropdowns extends MushroomBaseElement {
     @property({ attribute: false }) protected dropdowns?: LovelaceCardConfig[];
 
@@ -267,11 +267,11 @@ export class DropdownsCardEditorDropdowns extends MushroomBaseElement {
         if (!this.hass || !entities.length) return undefined;
         const matching = entities.every(
             (e) =>
-                (e.entity.split(".")[0] || e.split(".")[0]) ==
-                (entities[0].entity.split(".")[0] || entities[0].split(".")[0])
+                (e.entity?.split(".")[0] || e.split(".")[0]) ==
+                (entities[0].entity?.split(".")[0] || entities[0].split(".")[0])
         );
         const domain = matching
-            ? entities[0].entity.split(".")[0] || entities[0].split(".")[0]
+            ? entities[0].entity?.split(".")[0] || entities[0].split(".")[0]
             : "Various";
         return domain[0].toUpperCase() + domain.substr(1);
     }

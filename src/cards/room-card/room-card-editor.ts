@@ -15,7 +15,7 @@ import { EditSubElementEvent, SubElementEditorConfig } from "../../utils/lovelac
 import { ChipsCardOptions } from "../chips-card/chips-card";
 import { ROOM_CARD_EDITOR_NAME } from "./const";
 import { RoomCardConfig, roomCardConfigStruct } from "./room-card-config";
-import "./room-card-dropdowns-editor";
+import "../../utils/lovelace/dropdowns-element-editor";
 
 const computeSchema = memoizeOne((icon?: string, dropdowns?: any): HaFormSchema[] => [
     { name: "entity", selector: { entity: {} } },
@@ -140,13 +140,13 @@ export class RoomCardEditor extends MushroomBaseElement implements LovelaceCardE
         if (!this._config) return html``;
 
         return html`
-            <mushroom-room-card-dropdowns-editor
+            <mushroom-dropdowns-editor
                 .hass=${this.hass}
                 .lovelace=${this.lovelace}
                 .dropdowns=${this._config.dropdowns || []}
                 @dropdowns-changed=${this._dropdownsChanged}
                 @edit-detail-element=${this._editDetailElement}
-            ></mushroom-room-card-dropdowns-editor>
+            ></mushroom-dropdowns-editor>
         `;
     }
 
@@ -171,6 +171,7 @@ export class RoomCardEditor extends MushroomBaseElement implements LovelaceCardE
     }
 
     private _handleSwitchTab(ev: CustomEvent) {
+        this._goBack()
         this._selectedTab = parseInt(ev.detail.index, 10);
     }
 

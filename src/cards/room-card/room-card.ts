@@ -87,7 +87,6 @@ export class RoomCard extends MushroomBaseCard implements LovelaceCard {
             this._dropdown = undefined;
         } else {
             dropdown = +dropdown - 1 + "";
-            console.log(dropdown);
             this._dropdown = this._dropdown == dropdown ? undefined : dropdown;
         }
     }
@@ -157,11 +156,11 @@ export class RoomCard extends MushroomBaseCard implements LovelaceCard {
                                   <div
                                       class="chips-container"
                                       style="background-color: ${chips.color}"
-                                  >
+                                      >
                                       <mushroom-chips-card
-                                          .hass=${this.hass}
-                                          ._config=${chips}
-                                          @dropdown-changed=${this._handleDropdown}
+                                      .hass=${this.hass}
+                                      ._config=${chips}
+                                      @dropdown-changed=${this._handleDropdown}
                                       ></mushroom-chips-card>
                                   </div>
                               `}
