@@ -1,5 +1,5 @@
 import { HassEntity } from "home-assistant-js-websocket";
-import { css, CSSResultGroup, html, TemplateResult } from "lit";
+import { css, CSSResultGroup, html, nothing, PropertyValues, TemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
@@ -55,6 +55,7 @@ export class RoomCard extends MushroomBaseCard implements LovelaceCard {
 
     @state() private _config?: RoomCardConfig;
     @state() private _dropdown?: string;
+    @state() private _chips?: TemplateResult;
 
     getCardSize(): number | Promise<number> {
         return 1;
@@ -70,6 +71,14 @@ export class RoomCard extends MushroomBaseCard implements LovelaceCard {
             },
             ...config,
         };
+    }
+
+    protected updated(changedProps: PropertyValues): void {
+        super.updated(changedProps);
+
+        if (changedProps.has("_config")) {
+            this._renderChips();
+        }
     }
 
     private _handleAction(ev: ActionHandlerEvent) {
@@ -91,6 +100,28 @@ export class RoomCard extends MushroomBaseCard implements LovelaceCard {
         }
     }
 
+    private _renderChips() {
+        if (!this._chips && this._config?.chips?.chips?.length) {
+            const config = {
+                ...this._config.chips,
+                color: this._config.chips.color || "lightblue",
+                chips: this._config.chips.chips.map((n) => ({
+                    ...n,
+                })),
+            };
+
+            this._chips = html`
+                <div class="chips-container" style="background-color: ${config.color}">
+                    <mushroom-chips-card
+                        .hass=${this.hass}
+                        ._config=${config}
+                        @dropdown-changed=${this._handleDropdown}
+                    ></mushroom-chips-card>
+                </div>
+            `;
+        }
+    }
+
     protected render(): TemplateResult {
         if (!this._config || !this.hass || !this._config.entity) {
             return html``;
@@ -107,17 +138,6 @@ export class RoomCard extends MushroomBaseCard implements LovelaceCard {
         const picture = computeEntityPicture(entity, appearance.icon_type);
 
         const rtl = computeRTL(this.hass);
-
-        const chips =
-            this._config.chips && this._config.chips.chips.length
-                ? {
-                      ...this._config.chips,
-                      color: this._config.chips.color || "lightblue",
-                      chips: this._config.chips.chips.map((n) => ({
-                          ...n,
-                      })),
-                  }
-                : undefined;
 
         const dropdown =
             this._dropdown != undefined && config.dropdowns
@@ -150,20 +170,7 @@ export class RoomCard extends MushroomBaseCard implements LovelaceCard {
                                   <div class="divider"></div>
                                   <div class="dropdown-container">${this.renderCard(dropdown)}</div>
                               `}
-                        ${!chips
-                            ? ""
-                            : html`
-                                  <div
-                                      class="chips-container"
-                                      style="background-color: ${chips.color}"
-                                      >
-                                      <mushroom-chips-card
-                                      .hass=${this.hass}
-                                      ._config=${chips}
-                                      @dropdown-changed=${this._handleDropdown}
-                                      ></mushroom-chips-card>
-                                  </div>
-                              `}
+                        ${this._chips}
                     </div>
                 </mushroom-card>
             </ha-card>
