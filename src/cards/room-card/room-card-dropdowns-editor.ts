@@ -59,9 +59,9 @@ export class DropdownsCardEditorDropdowns extends MushroomBaseElement {
         return html`
             <h3>
                 ${this.label ||
-                `${customLocalize("editor.card.room.dropdown-picker.dropdowns")} (${this.hass!.localize(
-                    "ui.panel.lovelace.editor.card.config.required"
-                )})`}
+                `${customLocalize(
+                    "editor.card.room.dropdown-picker.dropdowns"
+                )} (${this.hass!.localize("ui.panel.lovelace.editor.card.config.required")})`}
             </h3>
             <div class="dropdowns">
                 ${guard([this.dropdowns, this._renderEmptySortable], () =>
@@ -267,11 +267,11 @@ export class DropdownsCardEditorDropdowns extends MushroomBaseElement {
         if (!this.hass || !entities.length) return undefined;
         const matching = entities.every(
             (e) =>
-                (e.entity.split(".")[0] || e.split(".")[0]) ==
-                (entities[0].entity.split(".")[0] || entities[0].split(".")[0])
+                (e.entity?.split(".")[0] || e.split(".")[0]) ==
+                (entities[0].entity?.split(".")[0] || entities[0].split(".")[0])
         );
         const domain = matching
-            ? entities[0].entity.split(".")[0] || entities[0].split(".")[0]
+            ? entities[0].entity?.split(".")[0] || entities[0].split(".")[0]
             : "Various";
         return domain[0].toUpperCase() + domain.substr(1);
     }
