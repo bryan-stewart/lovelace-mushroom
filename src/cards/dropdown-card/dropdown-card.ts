@@ -137,16 +137,15 @@ export class DropdownCard extends MushroomBaseCard implements LovelaceCard {
             <ha-card class=${classMap({ "fill-container": appearance.fill_container })}>
                 <mushroom-card .appearance=${appearance} ?rtl=${rtl}>
                     <div>
-                        <div class="state-container">
-                            <mushroom-state-item
-                                ?rtl=${rtl}
-                                .appearance=${appearance}
-                                @action=${this._handleAction}
-                                .actionHandler=${actionHandler({
-                                    hasHold: hasAction(this._config.hold_action),
-                                    hasDoubleClick: hasAction(this._config.double_tap_action),
-                                })}
-                            >
+                        <div
+                            class="state-container"
+                            @action=${this._handleAction}
+                            .actionHandler=${actionHandler({
+                                hasHold: hasAction(this._config.hold_action),
+                                hasDoubleClick: hasAction(this._config.double_tap_action),
+                            })}
+                        >
+                            <mushroom-state-item ?rtl=${rtl} .appearance=${appearance}>
                                 ${picture
                                     ? this.renderPicture(picture)
                                     : this.renderIcon(entity, icon)}
