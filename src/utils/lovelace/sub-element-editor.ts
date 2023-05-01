@@ -1,5 +1,6 @@
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property, query, state } from "lit/decorators.js";
+import { ChipsCardOptions } from "../../cards/chips-card/chips-card";
 import { fireEvent, HASSDomEvent, HomeAssistant } from "../../ha";
 import setupCustomlocalize from "../../localize";
 import "./chip-element-editor";
@@ -19,6 +20,8 @@ export class MushroomSubElementEditor extends LitElement {
     public hass!: HomeAssistant;
 
     @property({ attribute: false }) public config!: SubElementEditorConfig;
+
+    @property({ attribute: false }) public options?: ChipsCardOptions;
 
     @state() private _guiModeAvailable = true;
 
@@ -61,6 +64,7 @@ export class MushroomSubElementEditor extends LitElement {
                           class="editor"
                           .hass=${this.hass}
                           .value=${this.config.elementConfig}
+                          .options=${this.options}
                           @config-changed=${this._handleConfigChanged}
                           @GUImode-changed=${this._handleGUIModeChanged}
                       ></mushroom-chip-element-editor>
@@ -72,6 +76,7 @@ export class MushroomSubElementEditor extends LitElement {
                           class="editor"
                           .hass=${this.hass}
                           .value=${this.config.elementConfig}
+                          .options=${this.options}
                           @config-changed=${this._handleConfigChanged}
                           @GUImode-changed=${this._handleGUIModeChanged}
                       ></mushroom-card-element-editor>

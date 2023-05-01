@@ -1,4 +1,5 @@
 import { ActionConfig, LovelaceCardConfig, LovelaceViewConfig, ShowViewConfig } from "../../../ha";
+import { ChipsCardOptions } from "../../../cards/chips-card/chips-card";
 import { LovelaceChipConfig } from "../chip/types";
 
 export interface YamlChangedEvent extends Event {
@@ -78,6 +79,7 @@ export interface SubElementEditorConfig {
     index?: number;
     elementConfig?: LovelaceChipConfig;
     type: string;
+    options?: ChipsCardOptions;
 }
 
 export interface EditSubElementEvent {

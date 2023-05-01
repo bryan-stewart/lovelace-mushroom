@@ -3,7 +3,10 @@ import { customElement, property, state } from "lit/decorators.js";
 import memoizeOne from "memoize-one";
 import { fireEvent, HomeAssistant } from "../../../ha";
 import setupCustomlocalize from "../../../localize";
-import { computeActionsFormSchema } from "../../../shared/config/actions-config";
+import {
+    computeActionsFormSchema,
+    computeCustomActionsFormSchema,
+} from "../../../shared/config/actions-config";
 import { GENERIC_LABELS } from "../../../utils/form/generic-fields";
 import { HaFormSchema } from "../../../utils/form/ha-form";
 import { UiAction } from "../../../utils/form/ha-selector";
@@ -12,10 +15,11 @@ import { computeChipEditorComponentName } from "../../../utils/lovelace/chip/chi
 import { AlarmControlPanelChipConfig } from "../../../utils/lovelace/chip/types";
 import { LovelaceChipEditor } from "../../../utils/lovelace/types";
 import { ALARM_CONTROl_PANEL_ENTITY_DOMAINS } from "../../alarm-control-panel-card/const";
+import { ChipsCardOptions } from "../chips-card";
 
 const actions: UiAction[] = ["more-info", "navigate", "url", "call-service", "none"];
 
-const computeSchema = memoizeOne((icon?: string): HaFormSchema[] => [
+const computeSchema = memoizeOne((icon?: string, dropdowns?: string[]): HaFormSchema[] => [
     { name: "entity", selector: { entity: { domain: ALARM_CONTROl_PANEL_ENTITY_DOMAINS } } },
     {
         type: "grid",
@@ -26,12 +30,14 @@ const computeSchema = memoizeOne((icon?: string): HaFormSchema[] => [
         ],
     },
     { name: "icon", selector: { icon: { placeholder: icon } } },
-    ...computeActionsFormSchema(actions),
+    ...(dropdowns ? computeCustomActionsFormSchema({ dropdowns }) : computeActionsFormSchema()),
 ]);
 
 @customElement(computeChipEditorComponentName("alarm-control-panel"))
 export class AlarmControlPanelChipEditor extends LitElement implements LovelaceChipEditor {
     @property({ attribute: false }) public hass?: HomeAssistant;
+
+    @property({ attribute: false }) public options?: ChipsCardOptions;
 
     @state() private _config?: AlarmControlPanelChipConfig;
 
@@ -56,7 +62,8 @@ export class AlarmControlPanelChipEditor extends LitElement implements LovelaceC
         const entityState = this._config.entity ? this.hass.states[this._config.entity] : undefined;
         const entityIcon = entityState ? stateIcon(entityState) : undefined;
         const icon = this._config.icon || entityIcon;
-        const schema = computeSchema(icon);
+        const dropdowns = this.options?.dropdowns;
+        const schema = computeSchema(icon, dropdowns);
 
         return html`
             <ha-form

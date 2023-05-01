@@ -21,6 +21,10 @@ export interface ChipsCardConfig extends LovelaceCardConfig {
     alignment?: string;
 }
 
+export interface ChipsCardOptions {
+    dropdowns?: string[];
+}
+
 registerCustomCard({
     type: CHIPS_CARD_NAME,
     name: "Mushroom Chips Card",

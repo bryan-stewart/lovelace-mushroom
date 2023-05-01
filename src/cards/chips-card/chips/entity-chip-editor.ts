@@ -1,17 +1,18 @@
-import { html, LitElement, nothing, TemplateResult } from "lit";
+import { html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import memoizeOne from "memoize-one";
 import { fireEvent, HomeAssistant } from "../../../ha";
 import setupCustomlocalize from "../../../localize";
-import { computeActionsFormSchema } from "../../../shared/config/actions-config";
+import { computeActionsFormSchema, computeCustomActionsFormSchema } from "../../../shared/config/actions-config";
 import { GENERIC_LABELS } from "../../../utils/form/generic-fields";
 import { HaFormSchema } from "../../../utils/form/ha-form";
 import { stateIcon } from "../../../utils/icons/state-icon";
 import { computeChipEditorComponentName } from "../../../utils/lovelace/chip/chip-element";
 import { EntityChipConfig } from "../../../utils/lovelace/chip/types";
 import { LovelaceChipEditor } from "../../../utils/lovelace/types";
+import { ChipsCardOptions } from "../chips-card";
 
-const computeSchema = memoizeOne((icon?: string): HaFormSchema[] => [
+const computeSchema = memoizeOne((icon?: string, dropdowns?: string[]): HaFormSchema[] => [
     { name: "entity", selector: { entity: {} } },
     {
         type: "grid",
@@ -30,12 +31,14 @@ const computeSchema = memoizeOne((icon?: string): HaFormSchema[] => [
         ],
     },
     { name: "use_entity_picture", selector: { boolean: {} } },
-    ...computeActionsFormSchema(),
+    ...(dropdowns ? computeCustomActionsFormSchema({ dropdowns }) : computeActionsFormSchema()),
 ]);
 
 @customElement(computeChipEditorComponentName("entity"))
 export class EntityChipEditor extends LitElement implements LovelaceChipEditor {
     @property({ attribute: false }) public hass?: HomeAssistant;
+
+    @property({ attribute: false }) public options?: ChipsCardOptions;
 
     @state() private _config?: EntityChipConfig;
 
@@ -60,7 +63,8 @@ export class EntityChipEditor extends LitElement implements LovelaceChipEditor {
         const entityState = this._config.entity ? this.hass.states[this._config.entity] : undefined;
         const entityIcon = entityState ? stateIcon(entityState) : undefined;
         const icon = this._config.icon || entityIcon;
-        const schema = computeSchema(icon);
+        const dropdowns = this.options?.dropdowns;
+        const schema = computeSchema(icon, dropdowns);
 
         return html`
             <ha-form
