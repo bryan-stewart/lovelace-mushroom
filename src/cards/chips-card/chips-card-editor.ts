@@ -1,4 +1,4 @@
-import { html, nothing } from "lit";
+import { css, CSSResultGroup, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import {
     any,
@@ -26,7 +26,7 @@ import {
     SubElementEditorConfig,
 } from "../../utils/lovelace/editor/types";
 import "../../utils/lovelace/sub-element-editor";
-import { ChipsCardConfig } from "./chips-card";
+import { ChipsCardConfig, ChipsCardOptions } from "./chips-card";
 import "./chips-card-chips-editor";
 import { CHIPS_CARD_EDITOR_NAME } from "./const";
 
@@ -153,6 +153,8 @@ const cardConfigStruct = assign(
 export class ChipsCardEditor extends MushroomBaseElement implements LovelaceCardEditor {
     @state() private _config?: ChipsCardConfig;
 
+    @state() private _options?: ChipsCardOptions;
+
     @state() private _subElementEditorConfig?: SubElementEditorConfig;
 
     connectedCallback() {
@@ -183,6 +185,7 @@ export class ChipsCardEditor extends MushroomBaseElement implements LovelaceCard
                 <mushroom-sub-element-editor
                     .hass=${this.hass}
                     .config=${this._subElementEditorConfig}
+                    .options=${this._options}
                     @go-back=${this._goBack}
                     @config-changed=${this._handleSubElementChanged}
                 >

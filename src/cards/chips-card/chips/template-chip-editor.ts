@@ -1,17 +1,21 @@
-import { html, LitElement, nothing, TemplateResult } from "lit";
+import { html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import memoizeOne from "memoize-one";
 import { fireEvent, HomeAssistant } from "../../../ha";
 import setupCustomlocalize from "../../../localize";
-import { computeActionsFormSchema } from "../../../shared/config/actions-config";
+import {
+    computeActionsFormSchema,
+    computeCustomActionsFormSchema,
+} from "../../../shared/config/actions-config";
 import { GENERIC_LABELS } from "../../../utils/form/generic-fields";
 import { HaFormSchema } from "../../../utils/form/ha-form";
 import { computeChipEditorComponentName } from "../../../utils/lovelace/chip/chip-element";
 import { TemplateChipConfig } from "../../../utils/lovelace/chip/types";
 import { LovelaceChipEditor } from "../../../utils/lovelace/types";
 import { TEMPLATE_LABELS } from "../../template-card/template-card-editor";
+import { ChipsCardOptions } from "../chips-card";
 
-const computeSchema = memoizeOne((): HaFormSchema[] => [
+const computeSchema = memoizeOne((dropdowns?: string[]): HaFormSchema[] => [
     { name: "entity", selector: { entity: {} } },
     {
         name: "icon",
@@ -29,12 +33,14 @@ const computeSchema = memoizeOne((): HaFormSchema[] => [
         name: "content",
         selector: { template: {} },
     },
-    ...computeActionsFormSchema(),
+    ...(dropdowns ? computeCustomActionsFormSchema({ dropdowns }) : computeActionsFormSchema()),
 ]);
 
 @customElement(computeChipEditorComponentName("template"))
 export class EntityChipEditor extends LitElement implements LovelaceChipEditor {
     @property({ attribute: false }) public hass?: HomeAssistant;
+
+    @property({ attribute: false }) public options?: ChipsCardOptions;
 
     @state() private _config?: TemplateChipConfig;
 
@@ -64,7 +70,8 @@ export class EntityChipEditor extends LitElement implements LovelaceChipEditor {
             return nothing;
         }
 
-        const schema = computeSchema();
+        const dropdowns = this.options?.dropdowns;
+        const schema = computeSchema(dropdowns);
 
         return html`
             <ha-form

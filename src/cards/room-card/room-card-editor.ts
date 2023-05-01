@@ -12,9 +12,10 @@ import { HaFormSchema } from "../../utils/form/ha-form";
 import { stateIcon } from "../../utils/icons/state-icon";
 import { loadHaComponents } from "../../utils/loader";
 import { EditSubElementEvent, SubElementEditorConfig } from "../../utils/lovelace/editor/types";
-import { DROPDOWN_CARD_EDITOR_NAME } from "./const";
-import { DropdownCardConfig, dropdownCardConfigStruct } from "./dropdown-card-config";
-import "./dropdown-card-dropdowns-editor";
+import { ChipsCardOptions } from "../chips-card/chips-card";
+import { ROOM_CARD_EDITOR_NAME } from "./const";
+import { RoomCardConfig, roomCardConfigStruct } from "./room-card-config";
+import "./room-card-dropdowns-editor";
 
 const computeSchema = memoizeOne((icon?: string, dropdowns?: any): HaFormSchema[] => [
     { name: "entity", selector: { entity: {} } },
@@ -28,19 +29,12 @@ const computeSchema = memoizeOne((icon?: string, dropdowns?: any): HaFormSchema[
         ],
     },
     ...APPEARANCE_FORM_SCHEMA,
-    {
-        type: "grid",
-        name: "",
-        schema: [
-            { name: "hide_arrow", selector: { boolean: {} } },
-        ],
-    },
     ...computeCustomActionsFormSchema({ dropdowns }),
 ]);
 
-@customElement(DROPDOWN_CARD_EDITOR_NAME)
-export class DropdownCardEditor extends MushroomBaseElement implements LovelaceCardEditor {
-    @state() private _config?: DropdownCardConfig;
+@customElement(ROOM_CARD_EDITOR_NAME)
+export class RoomCardEditor extends MushroomBaseElement implements LovelaceCardEditor {
+    @state() private _config?: RoomCardConfig;
 
     @state() private _subElementEditorConfig?: SubElementEditorConfig;
 
@@ -51,8 +45,8 @@ export class DropdownCardEditor extends MushroomBaseElement implements LovelaceC
         void loadHaComponents();
     }
 
-    public setConfig(config: DropdownCardConfig): void {
-        assert(config, dropdownCardConfigStruct);
+    public setConfig(config: RoomCardConfig): void {
+        assert(config, roomCardConfigStruct);
         this._config = config;
     }
 
@@ -70,7 +64,7 @@ export class DropdownCardEditor extends MushroomBaseElement implements LovelaceC
             return html``;
         }
 
-        const pages = [this._renderMainTab, this._renderDropdownsTab];
+        const pages = [this._renderMainTab, this._renderChipsTab, this._renderDropdownsTab];
 
         return html`
             <div class="card-config">
@@ -80,6 +74,7 @@ export class DropdownCardEditor extends MushroomBaseElement implements LovelaceC
                         @MDCTabBar:activated=${this._handleSwitchTab}
                     >
                         <mwc-tab .label=${"Main"}></mwc-tab>
+                        <mwc-tab .label=${"Chips"}></mwc-tab>
                         <mwc-tab .label=${"Dropdowns"}></mwc-tab>
                     </mwc-tab-bar>
                 </div>
@@ -127,17 +122,31 @@ export class DropdownCardEditor extends MushroomBaseElement implements LovelaceC
         `;
     }
 
+    protected _renderChipsTab() {
+        const dropdowns = this._config?.dropdowns.map((d) => d.type) as ChipsCardOptions;
+
+        return html`
+            <mushroom-chips-card-editor
+                ._config=${this._config?.chips || { chips: [] }}
+                ._options=${{ dropdowns }}
+                .hass=${this.hass}
+                @config-changed=${(config) => this._chipsChanged(config)}
+                @go-back=${this._rerender}
+            ></mushroom-chips-card-editor>
+        `;
+    }
+
     protected _renderDropdownsTab() {
         if (!this._config) return html``;
 
         return html`
-            <mushroom-dropdown-card-dropdowns-editor
+            <mushroom-room-card-dropdowns-editor
                 .hass=${this.hass}
                 .lovelace=${this.lovelace}
                 .dropdowns=${this._config.dropdowns || []}
                 @dropdowns-changed=${this._dropdownsChanged}
                 @edit-detail-element=${this._editDetailElement}
-            ></mushroom-dropdown-card-dropdowns-editor>
+            ></mushroom-room-card-dropdowns-editor>
         `;
     }
 
@@ -174,7 +183,17 @@ export class DropdownCardEditor extends MushroomBaseElement implements LovelaceC
         const configValue = this._subElementEditorConfig?.type;
         const value = ev.detail.config;
 
-        if (configValue === "card") {
+        if (configValue === "chip") {
+            const newConfigChips = this._config!.chips!.concat();
+            if (!value) {
+                newConfigChips.splice(this._subElementEditorConfig!.index!, 1);
+                this._goBack();
+            } else {
+                newConfigChips[this._subElementEditorConfig!.index!] = value;
+            }
+
+            this._config = { ...this._config!, chips: newConfigChips };
+        } else if (configValue === "card") {
             const newConfigDropdowns = this._config!.dropdowns!.concat();
             if (!value) {
                 newConfigDropdowns.splice(this._subElementEditorConfig!.index!, 1);

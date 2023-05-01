@@ -29,46 +29,38 @@ import { registerCustomCard } from "../../utils/custom-cards";
 import { stateIcon } from "../../utils/icons/state-icon";
 import { computeEntityPicture } from "../../utils/info";
 import { createCardElement } from "../../utils/lovelace/card/card-element";
-import { DROPDOWN_CARD_EDITOR_NAME, DROPDOWN_CARD_NAME } from "./const";
-import { DropdownCardConfig } from "./dropdown-card-config";
+import { ROOM_CARD_EDITOR_NAME, ROOM_CARD_NAME } from "./const";
+import { RoomCardConfig } from "./room-card-config";
 
 registerCustomCard({
-    type: DROPDOWN_CARD_NAME,
-    name: "Mushroom Dropdown Card",
-    description: "Card with dropdowns",
+    type: ROOM_CARD_NAME,
+    name: "Mushroom Room Card",
+    description: "Card for all entities",
 });
 
-@customElement(DROPDOWN_CARD_NAME)
-export class DropdownCard extends MushroomBaseCard implements LovelaceCard {
+@customElement(ROOM_CARD_NAME)
+export class RoomCard extends MushroomBaseCard implements LovelaceCard {
     public static async getConfigElement(): Promise<LovelaceCardEditor> {
-        await import("./dropdown-card-editor");
-        return document.createElement(DROPDOWN_CARD_EDITOR_NAME) as LovelaceCardEditor;
+        await import("./room-card-editor");
+        return document.createElement(ROOM_CARD_EDITOR_NAME) as LovelaceCardEditor;
     }
 
-    public static async getStubConfig(hass: HomeAssistant): Promise<DropdownCardConfig> {
+    public static async getStubConfig(hass: HomeAssistant): Promise<RoomCardConfig> {
         const entities = Object.keys(hass.states);
         return {
-            type: `custom:${DROPDOWN_CARD_NAME}`,
+            type: `custom:${ROOM_CARD_NAME}`,
             entity: entities[0],
-            tap_action: {
-                action: 'dropdown',
-                dropdown: '1'
-            },
-            dropdowns: [{
-                type: 'entities',
-                entities: entities.slice(1,4)
-            }]
         };
     }
 
-    @state() private _config?: DropdownCardConfig;
+    @state() private _config?: RoomCardConfig;
     @state() private _dropdown?: string;
 
     getCardSize(): number | Promise<number> {
         return 1;
     }
 
-    setConfig(config: DropdownCardConfig): void {
+    setConfig(config: RoomCardConfig): void {
         this._config = {
             tap_action: {
                 action: "more-info",
@@ -89,13 +81,13 @@ export class DropdownCard extends MushroomBaseCard implements LovelaceCard {
     }
 
     private _handleDropdown(ev: ActionHandlerEvent) {
-        let action = ev.detail.action
         let dropdown =
-            (ev.detail as any).dropdown || this._config![action + "_action"].dropdown;
-        if (dropdown == "close" || (action == 'tap' && this._dropdown)) {
+            (ev.detail as any).dropdown || this._config![ev.detail.action + "_action"].dropdown;
+        if (dropdown == "close") {
             this._dropdown = undefined;
         } else {
             dropdown = +dropdown - 1 + "";
+            console.log(dropdown);
             this._dropdown = this._dropdown == dropdown ? undefined : dropdown;
         }
     }
@@ -153,21 +145,26 @@ export class DropdownCard extends MushroomBaseCard implements LovelaceCard {
                                 ${this.renderBadge(entity)}
                                 ${this.renderStateInfo(entity, appearance, name)};
                             </mushroom-state-item>
-                            <div
-                                class="${classMap({
-                                    toggle: true,
-                                    closed: !this._dropdown,
-                                    hidden: this._config.hide_arrow || false,
-                                })}"
-                            >
-                                <ha-icon icon="mdi:chevron-up"></ha-icon>
-                            </div>
                         </div>
                         ${!dropdown
                             ? ""
                             : html`
                                   <div class="divider"></div>
                                   <div class="dropdown-container">${this.renderCard(dropdown)}</div>
+                              `}
+                        ${!chips
+                            ? ""
+                            : html`
+                                  <div
+                                      class="chips-container"
+                                      style="background-color: ${chips.color}"
+                                  >
+                                      <mushroom-chips-card
+                                          .hass=${this.hass}
+                                          ._config=${chips}
+                                          @dropdown-changed=${this._handleDropdown}
+                                      ></mushroom-chips-card>
+                                  </div>
                               `}
                     </div>
                 </mushroom-card>
@@ -215,19 +212,7 @@ export class DropdownCard extends MushroomBaseCard implements LovelaceCard {
                     padding: unset;
                 }
                 .state-container {
-                    display: flex;
                     padding: 12px;
-                }
-                .toggle {
-                    display: flex;
-                    flex-shrink: 1;
-                    align-items: center;
-                }
-                .toggle.closed {
-                    transform: rotate(180deg);
-                }
-                .toggle.hidden {
-                    display: none;
                 }
                 .divider {
                     height: 0.5px;
@@ -237,10 +222,15 @@ export class DropdownCard extends MushroomBaseCard implements LovelaceCard {
                 .dropdown-container {
                     --ha-card-border-width: 0;
                 }
+                .chips-container {
+                    padding: 0 6px;
+                    /* background-color: lightblue; */
+                    /* --mush-chip-height: 28px; */
+                    --mush-chip-background: none;
+                    --mush-chip-border-width: 0;
+                }
                 mushroom-state-item {
-                    flex-grow: 1;
                     cursor: pointer;
-                    user-select: none;
                 }
                 mushroom-shape-icon {
                     --icon-color: rgb(var(--rgb-state-entity));

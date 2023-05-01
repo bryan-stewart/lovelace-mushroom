@@ -3,20 +3,24 @@ import { customElement, property, state } from "lit/decorators.js";
 import memoizeOne from "memoize-one";
 import { fireEvent, HomeAssistant } from "../../../ha";
 import setupCustomlocalize from "../../../localize";
-import { computeActionsFormSchema } from "../../../shared/config/actions-config";
+import {
+    computeActionsFormSchema,
+    computeCustomActionsFormSchema,
+} from "../../../shared/config/actions-config";
 import { GENERIC_LABELS } from "../../../utils/form/generic-fields";
 import { HaFormSchema } from "../../../utils/form/ha-form";
 import { UiAction } from "../../../utils/form/ha-selector";
 import { computeChipEditorComponentName } from "../../../utils/lovelace/chip/chip-element";
 import { WeatherChipConfig } from "../../../utils/lovelace/chip/types";
 import { LovelaceChipEditor } from "../../../utils/lovelace/types";
+import { ChipsCardOptions } from "../chips-card";
 
 const WEATHER_ENTITY_DOMAINS = ["weather"];
 const WEATHER_LABELS = ["show_conditions", "show_temperature"];
 
 const actions: UiAction[] = ["more-info", "navigate", "url", "call-service", "none"];
 
-const computeSchema = memoizeOne((): HaFormSchema[] => [
+const computeSchema = memoizeOne((dropdowns?: string[]): HaFormSchema[] => [
     { name: "entity", selector: { entity: { domain: WEATHER_ENTITY_DOMAINS } } },
     {
         type: "grid",
@@ -26,12 +30,16 @@ const computeSchema = memoizeOne((): HaFormSchema[] => [
             { name: "show_temperature", selector: { boolean: {} } },
         ],
     },
-    ...computeActionsFormSchema(actions),
+    ...(dropdowns
+        ? computeCustomActionsFormSchema({ actions: [...actions, "dropdown"], dropdowns })
+        : computeActionsFormSchema(actions)),
 ]);
 
 @customElement(computeChipEditorComponentName("weather"))
 export class WeatherChipEditor extends LitElement implements LovelaceChipEditor {
     @property({ attribute: false }) public hass?: HomeAssistant;
+
+    @property({ attribute: false }) public options?: ChipsCardOptions;
 
     @state() private _config?: WeatherChipConfig;
 
@@ -56,7 +64,8 @@ export class WeatherChipEditor extends LitElement implements LovelaceChipEditor 
             return nothing;
         }
 
-        const schema = computeSchema();
+        const dropdowns = this.options?.dropdowns;
+        const schema = computeSchema(dropdowns);
 
         return html`
             <ha-form

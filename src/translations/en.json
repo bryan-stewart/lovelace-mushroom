@@ -64,8 +64,7 @@
                 "content_info": "Content",
                 "use_entity_picture": "Use entity picture?",
                 "collapsible_controls": "Collapse controls when off",
-                "icon_animation": "Animate icon when active?",
-                "hide_arrow": "Hide arrow"
+                "icon_animation": "Animate icon when active?"
             },
             "light": {
                 "show_brightness_control": "Brightness control?",
@@ -158,7 +157,7 @@
                     "buttons": "Buttons"
                 }
                        },
-            "dropdown": {
+            "room": {
                 "dropdown-picker": {
                     "dropdowns": "Dropdowns",
                     "add": "Add Dropdown",

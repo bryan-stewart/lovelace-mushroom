@@ -139,6 +139,10 @@ export const handleAction = async (
         }
         case "fire-dom-event": {
             fireEvent(node, "ll-custom", actionConfig);
+            break;
+        }
+        case "dropdown": {
+            fireEvent(node, "dropdown-changed", actionConfig);
         }
     }
 };
@@ -169,5 +173,8 @@ declare global {
     }
     interface HASSDomEvents {
         "ll-custom": ActionConfig;
+    }
+    interface HASSDomEvents {
+        "dropdown-changed": ActionConfig;
     }
 }

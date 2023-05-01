@@ -17,7 +17,7 @@ declare global {
     }
 }
 
-@customElement("mushroom-dropdown-card-dropdowns-editor")
+@customElement("mushroom-room-card-dropdowns-editor")
 export class DropdownsCardEditorDropdowns extends MushroomBaseElement {
     @property({ attribute: false }) protected dropdowns?: LovelaceCardConfig[];
 
@@ -59,9 +59,9 @@ export class DropdownsCardEditorDropdowns extends MushroomBaseElement {
         return html`
             <h3>
                 ${this.label ||
-                `${customLocalize(
-                    "editor.card.dropdown.dropdown-picker.dropdowns"
-                )} (${this.hass!.localize("ui.panel.lovelace.editor.card.config.required")})`}
+                `${customLocalize("editor.card.room.dropdown-picker.dropdowns")} (${this.hass!.localize(
+                    "ui.panel.lovelace.editor.card.config.required"
+                )})`}
             </h3>
             <div class="dropdowns">
                 ${guard([this.dropdowns, this._renderEmptySortable], () =>
@@ -91,7 +91,7 @@ export class DropdownsCardEditorDropdowns extends MushroomBaseElement {
                                       `}
                                       <ha-icon-button
                                           .label=${customLocalize(
-                                              "editor.card.dropdown.dropdown-picker.clear"
+                                              "editor.card.room.dropdown-picker.clear"
                                           )}
                                           class="remove-icon"
                                           .index=${index}
@@ -101,7 +101,7 @@ export class DropdownsCardEditorDropdowns extends MushroomBaseElement {
                                       ></ha-icon-button>
                                       <ha-icon-button
                                           .label=${customLocalize(
-                                              "editor.card.dropdown.dropdown-picker.edit"
+                                              "editor.card.room.dropdown-picker.edit"
                                           )}
                                           class="edit-icon"
                                           .index=${index}
@@ -115,7 +115,7 @@ export class DropdownsCardEditorDropdowns extends MushroomBaseElement {
                 )}
             </div>
             <div class="button" @click=${this._openCardPicker}>
-                ${customLocalize("editor.card.dropdown.dropdown-picker.add")}
+                ${customLocalize("editor.card.room.dropdown-picker.add")}
                 <ha-icon icon="mdi:plus"></ha-icon>
             </div>
         `;
@@ -267,11 +267,11 @@ export class DropdownsCardEditorDropdowns extends MushroomBaseElement {
         if (!this.hass || !entities.length) return undefined;
         const matching = entities.every(
             (e) =>
-                (e.entity?.split(".")[0] || e.split(".")[0]) ==
-                (entities[0].entity?.split(".")[0] || entities[0].split(".")[0])
+                (e.entity.split(".")[0] || e.split(".")[0]) ==
+                (entities[0].entity.split(".")[0] || entities[0].split(".")[0])
         );
         const domain = matching
-            ? entities[0].entity?.split(".")[0] || entities[0].split(".")[0]
+            ? entities[0].entity.split(".")[0] || entities[0].split(".")[0]
             : "Various";
         return domain[0].toUpperCase() + domain.substr(1);
     }
