@@ -148,7 +148,7 @@ export interface CustomActionConfig extends BaseActionConfig {
     action: "fire-dom-event";
 }
 export interface DropdownActionConfig extends BaseActionConfig {
-    action: "dropdown";
+    action: "dropdown" | "hold" | "tap" | "double_tap";
     dropdown: number | string;
 }
 

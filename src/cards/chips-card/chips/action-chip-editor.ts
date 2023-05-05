@@ -4,8 +4,7 @@ import memoizeOne from "memoize-one";
 import { fireEvent, HomeAssistant } from "../../../ha";
 import setupCustomlocalize from "../../../localize";
 import {
-    computeActionsFormSchema,
-    computeCustomActionsFormSchema,
+    computeActionsFormSchema
 } from "../../../shared/config/actions-config";
 import { GENERIC_LABELS } from "../../../utils/form/generic-fields";
 import { HaFormSchema } from "../../../utils/form/ha-form";
@@ -15,10 +14,11 @@ import { ActionChipConfig } from "../../../utils/lovelace/chip/types";
 import { LovelaceChipEditor } from "../../../utils/lovelace/types";
 import { ChipsCardOptions } from "../chips-card";
 import { DEFAULT_ACTION_ICON } from "./action-chip";
+import { CardEditorOptions } from "../../../utils/lovelace/editor/types";
 
 const actions: UiAction[] = ["navigate", "url", "call-service", "none"];
 
-const computeSchema = memoizeOne((icon?: string, dropdowns?: string[]): HaFormSchema[] => [
+const computeSchema = memoizeOne(({ icon, dropdowns }: CardEditorOptions): HaFormSchema[] => [
     {
         type: "grid",
         name: "",
@@ -27,7 +27,7 @@ const computeSchema = memoizeOne((icon?: string, dropdowns?: string[]): HaFormSc
             { name: "icon_color", selector: { mush_color: {} } },
         ],
     },
-    ...(dropdowns ? computeCustomActionsFormSchema({ dropdowns }) : computeActionsFormSchema()),
+    ...computeActionsFormSchema({ actions, dropdowns }),
 ]);
 
 @customElement(computeChipEditorComponentName("action"))
@@ -56,9 +56,10 @@ export class EntityChipEditor extends LitElement implements LovelaceChipEditor {
             return nothing;
         }
 
-        const icon = this._config.icon || DEFAULT_ACTION_ICON;
-        const dropdowns = this.options?.dropdowns;
-        const schema = computeSchema(icon, dropdowns);
+        const schema = computeSchema({
+            icon: this._config.icon || DEFAULT_ACTION_ICON,
+            dropdowns: this.options?.dropdowns,
+        });
 
         return html`
             <ha-form

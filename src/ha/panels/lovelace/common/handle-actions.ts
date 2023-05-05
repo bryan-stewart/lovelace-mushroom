@@ -16,7 +16,7 @@ export const handleAction = async (
         tap_action?: ActionConfig;
         double_tap_action?: ActionConfig;
     },
-    action: string
+    action: "hold" | "tap" | "double_tap"
 ): Promise<void> => {
     let actionConfig: ActionConfig | undefined;
 
@@ -142,7 +142,7 @@ export const handleAction = async (
             break;
         }
         case "dropdown": {
-            fireEvent(node, "dropdown-changed", actionConfig);
+            fireEvent(node, "dropdown-changed", { ...actionConfig, action });
         }
     }
 };

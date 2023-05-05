@@ -14,7 +14,11 @@ export class MushroomCardElementEditor extends MushroomElementEditor<LovelaceCar
 
         // Check if a GUI editor exists
         if (elClass && elClass.getConfigElement) {
-            return elClass.getConfigElement();
+            const configElement = await elClass.getConfigElement();
+            if (this.options) {
+                configElement.options = this.options;
+            }
+            return configElement;
         }
 
         return undefined;

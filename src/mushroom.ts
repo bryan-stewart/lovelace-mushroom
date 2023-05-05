@@ -22,6 +22,7 @@ export { PersonCard } from "./cards/person-card/person-card";
 export { DropdownCard } from "./cards/dropdown-card/dropdown-card";
 export { RoomCard } from "./cards/room-card/room-card";
 export { SelectCard } from "./cards/select-card/select-card";
+export { TabbedCard } from "./cards/tabbed-card/tabbed-card";
 export { TemplateCard } from "./cards/template-card/template-card";
 export { TitleCard } from "./cards/title-card/title-card";
 export { UpdateCard } from "./cards/update-card/update-card";

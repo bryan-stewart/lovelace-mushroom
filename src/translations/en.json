@@ -62,6 +62,10 @@
                     "extra-large": "Extra Large",
                     "custom": "Custom"
                 }
+            },
+            "card_picker": {
+                "edit": "Edit",
+                "clear": "Clear"
             }
         },
         "card": {
@@ -172,10 +176,13 @@
             "dropdown": {
                 "dropdown-picker": {
                     "dropdowns": "Dropdowns",
-                    "add": "Add Dropdown",
-                    "edit": "Edit",
-                    "clear": "Clear",
-                    "select": "Select dropdown"
+                    "add": "Add Dropdown"
+                }
+            },
+            "tabbed": {
+                "tab-picker": {
+                    "tabs": "Tabs",
+                    "add": "Add Tab"
                 }
             },
             "sub_element_editor": {
@@ -207,6 +214,11 @@
                     "template": "Template",
                     "weather": "Weather"
                 }
+            }
+        },
+        "tab": {
+            "sub_element_editor": {
+                "title": "Tab editor"
             }
         }
     },

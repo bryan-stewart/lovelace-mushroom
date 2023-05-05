@@ -3,10 +3,7 @@ import { customElement, property, state } from "lit/decorators.js";
 import memoizeOne from "memoize-one";
 import { fireEvent, HomeAssistant } from "../../../ha";
 import setupCustomlocalize from "../../../localize";
-import {
-    computeActionsFormSchema,
-    computeCustomActionsFormSchema,
-} from "../../../shared/config/actions-config";
+import { computeActionsFormSchema } from "../../../shared/config/actions-config";
 import { GENERIC_LABELS } from "../../../utils/form/generic-fields";
 import { HaFormSchema } from "../../../utils/form/ha-form";
 import { UiAction } from "../../../utils/form/ha-selector";
@@ -14,13 +11,14 @@ import { computeChipEditorComponentName } from "../../../utils/lovelace/chip/chi
 import { WeatherChipConfig } from "../../../utils/lovelace/chip/types";
 import { LovelaceChipEditor } from "../../../utils/lovelace/types";
 import { ChipsCardOptions } from "../chips-card";
+import { CardEditorOptions } from "../../../utils/lovelace/editor/types";
 
 const WEATHER_ENTITY_DOMAINS = ["weather"];
 const WEATHER_LABELS = ["show_conditions", "show_temperature"];
 
 const actions: UiAction[] = ["more-info", "navigate", "url", "call-service", "none"];
 
-const computeSchema = memoizeOne((dropdowns?: string[]): HaFormSchema[] => [
+const computeSchema = memoizeOne(({ dropdowns }: CardEditorOptions): HaFormSchema[] => [
     { name: "entity", selector: { entity: { domain: WEATHER_ENTITY_DOMAINS } } },
     {
         type: "grid",
@@ -30,9 +28,7 @@ const computeSchema = memoizeOne((dropdowns?: string[]): HaFormSchema[] => [
             { name: "show_temperature", selector: { boolean: {} } },
         ],
     },
-    ...(dropdowns
-        ? computeCustomActionsFormSchema({ actions: [...actions, "dropdown"], dropdowns })
-        : computeActionsFormSchema(actions)),
+    ...computeActionsFormSchema({ actions, dropdowns }),
 ]);
 
 @customElement(computeChipEditorComponentName("weather"))
@@ -64,8 +60,7 @@ export class WeatherChipEditor extends LitElement implements LovelaceChipEditor 
             return nothing;
         }
 
-        const dropdowns = this.options?.dropdowns;
-        const schema = computeSchema(dropdowns);
+        const schema = computeSchema({ dropdowns: this.options?.dropdowns });
 
         return html`
             <ha-form

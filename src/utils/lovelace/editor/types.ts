@@ -33,6 +33,11 @@ export interface ConfigError {
     message: string;
 }
 
+export interface CardEditorOptions {
+    icon?: string;
+    dropdowns?: string[];
+}
+
 export interface EntityConfig {
     entity: string;
     type?: string;

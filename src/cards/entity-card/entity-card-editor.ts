@@ -1,5 +1,5 @@
 import { html, nothing, TemplateResult } from "lit";
-import { customElement, state } from "lit/decorators.js";
+import { customElement, property, state } from "lit/decorators.js";
 import memoizeOne from "memoize-one";
 import { assert } from "superstruct";
 import { fireEvent, LovelaceCardEditor } from "../../ha";
@@ -13,8 +13,9 @@ import { stateIcon } from "../../utils/icons/state-icon";
 import { loadHaComponents } from "../../utils/loader";
 import { ENTITY_CARD_EDITOR_NAME } from "./const";
 import { EntityCardConfig, entityCardConfigStruct } from "./entity-card-config";
+import { CardEditorOptions } from "../../utils/lovelace/editor/types";
 
-const computeSchema = memoizeOne((icon?: string): HaFormSchema[] => [
+const computeSchema = memoizeOne(({ icon, dropdowns }: CardEditorOptions): HaFormSchema[] => [
     { name: "entity", selector: { entity: {} } },
     { name: "name", selector: { text: {} } },
     {
@@ -26,11 +27,13 @@ const computeSchema = memoizeOne((icon?: string): HaFormSchema[] => [
         ],
     },
     ...APPEARANCE_FORM_SCHEMA,
-    ...computeActionsFormSchema(),
+    ...computeActionsFormSchema({ dropdowns }),
 ]);
 
 @customElement(ENTITY_CARD_EDITOR_NAME)
 export class EntityCardEditor extends MushroomBaseElement implements LovelaceCardEditor {
+    @state() private options?: CardEditorOptions;
+
     @state() private _config?: EntityCardConfig;
 
     connectedCallback() {
@@ -59,8 +62,11 @@ export class EntityCardEditor extends MushroomBaseElement implements LovelaceCar
 
         const entityState = this._config.entity ? this.hass.states[this._config.entity] : undefined;
         const entityIcon = entityState ? stateIcon(entityState) : undefined;
-        const icon = this._config.icon || entityIcon;
-        const schema = computeSchema(icon);
+
+        const schema = computeSchema({
+            icon: this._config.icon || entityIcon,
+            dropdowns: this.options?.dropdowns,
+        });
 
         return html`
             <ha-form

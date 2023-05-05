@@ -5,7 +5,7 @@ import "../../../shared/editor/action-picker";
 import { UiAction } from "../ha-selector";
 
 export type MushActionSelector = {
-    "mush-action": { dropdowns: number; actions: UiAction[] };
+    "mush-action": { dropdowns: string[]; actions: UiAction[] };
 };
 
 @customElement("ha-selector-mush-action")
@@ -24,8 +24,8 @@ export class HaMushActionSelector extends LitElement {
                 .hass=${this.hass}
                 .label=${this.label}
                 .value=${this.value}
-                .actions=${this.selector["mush-action"].actions}
-                .dropdowns=${this.selector["mush-action"].dropdowns}
+                .actions=${this.selector["mush-action"]?.actions}
+                .dropdowns=${this.selector["mush-action"]?.dropdowns}
             ></mushroom-action-picker>
         `;
     }

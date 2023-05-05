@@ -4,20 +4,24 @@ import memoizeOne from "memoize-one";
 import { assert } from "superstruct";
 import { fireEvent, HASSDomEvent, LovelaceCardEditor } from "../../ha";
 import setupCustomlocalize from "../../localize";
-import { computeCustomActionsFormSchema } from "../../shared/config/actions-config";
+import { computeActionsFormSchema } from "../../shared/config/actions-config";
 import { APPEARANCE_FORM_SCHEMA } from "../../shared/config/appearance-config";
 import { MushroomBaseElement } from "../../utils/base-element";
 import { GENERIC_LABELS } from "../../utils/form/generic-fields";
 import { HaFormSchema } from "../../utils/form/ha-form";
 import { stateIcon } from "../../utils/icons/state-icon";
 import { loadHaComponents } from "../../utils/loader";
-import { EditSubElementEvent, SubElementEditorConfig } from "../../utils/lovelace/editor/types";
+import {
+    CardEditorOptions,
+    EditSubElementEvent,
+    SubElementEditorConfig,
+} from "../../utils/lovelace/editor/types";
 import { ChipsCardOptions } from "../chips-card/chips-card";
 import { ROOM_CARD_EDITOR_NAME } from "./const";
 import { RoomCardConfig, roomCardConfigStruct } from "./room-card-config";
 import "../../utils/lovelace/dropdowns-element-editor";
 
-const computeSchema = memoizeOne((icon?: string, dropdowns?: any): HaFormSchema[] => [
+const computeSchema = memoizeOne(({ icon, dropdowns }: CardEditorOptions): HaFormSchema[] => [
     { name: "entity", selector: { entity: {} } },
     { name: "name", selector: { text: {} } },
     {
@@ -29,7 +33,7 @@ const computeSchema = memoizeOne((icon?: string, dropdowns?: any): HaFormSchema[
         ],
     },
     ...APPEARANCE_FORM_SCHEMA,
-    ...computeCustomActionsFormSchema({ dropdowns }),
+    ...computeActionsFormSchema({ dropdowns }),
 ]);
 
 @customElement(ROOM_CARD_EDITOR_NAME)
@@ -100,7 +104,7 @@ export class RoomCardEditor extends MushroomBaseElement implements LovelaceCardE
             ? this.hass.states[this._config.entity]
             : undefined;
         const entityIcon = entityState ? stateIcon(entityState) : undefined;
-        const icon = this._config?.icon || entityIcon;
+
         const dropdowns =
             this._config?.dropdowns?.map((d) =>
                 d.type
@@ -109,7 +113,11 @@ export class RoomCardEditor extends MushroomBaseElement implements LovelaceCardE
                     .map((name) => name[0].toUpperCase() + name.substr(1))
                     .join(" ")
             ) || [];
-        const schema = computeSchema(icon, dropdowns);
+        
+        const schema = computeSchema({
+            icon: this._config?.icon || entityIcon,
+            dropdowns,
+        });
 
         return html`
             <ha-form
@@ -171,7 +179,7 @@ export class RoomCardEditor extends MushroomBaseElement implements LovelaceCardE
     }
 
     private _handleSwitchTab(ev: CustomEvent) {
-        this._goBack()
+        this._goBack();
         this._selectedTab = parseInt(ev.detail.index, 10);
     }
 

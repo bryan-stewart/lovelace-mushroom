@@ -5,25 +5,26 @@ import type { SortableEvent } from "sortablejs";
 import { fireEvent, LovelaceCardConfig, sortableStyles } from "../../ha";
 import setupCustomlocalize from "../../localize";
 import "../../shared/form/mushroom-select";
-import { MushroomBaseElement } from "../base-element";
+import { MushroomBaseElement } from "../../utils/base-element";
+import { EditorTarget } from "../../utils/lovelace/editor/types";
 
 let Sortable;
 
 declare global {
     interface HASSDomEvents {
-        "dropdowns-changed": {
-            dropdowns: LovelaceCardConfig[];
+        "tabs-changed": {
+            tabs: LovelaceCardConfig[];
         };
     }
 }
 
-@customElement("mushroom-dropdowns-editor")
-export class DropdownsCardEditorDropdowns extends MushroomBaseElement {
-    @property({ attribute: false }) protected dropdowns?: LovelaceCardConfig[];
+const TAB_LIST = ["entity", "template"];
+
+@customElement("mushroom-tabs-editor")
+export class TabbedCardEditorTabs extends MushroomBaseElement {
+    @property({ attribute: false }) protected tabs?: LovelaceCardConfig[];
 
     @property() protected label?: string;
-
-    @state() private _cardPicker: boolean = false;
 
     @state() private _attached = false;
 
@@ -42,16 +43,8 @@ export class DropdownsCardEditorDropdowns extends MushroomBaseElement {
     }
 
     protected render() {
-        if (!this.dropdowns || !this.hass) {
+        if (!this.tabs || !this.hass) {
             return nothing;
-        }
-
-        if (this._cardPicker) {
-            return html`<hui-card-picker
-                .lovelace=${this.lovelace}
-                .hass=${this.hass}
-                @config-changed=${this._addDropdown}
-            ></hui-card-picker>`;
         }
 
         const customLocalize = setupCustomlocalize(this.hass);
@@ -59,32 +52,26 @@ export class DropdownsCardEditorDropdowns extends MushroomBaseElement {
         return html`
             <h3>
                 ${this.label ||
-                `${customLocalize("editor.card.dropdown.dropdown-picker.dropdowns")} (${this.hass!.localize(
+                `${customLocalize("editor.card.tabbed.tab-picker.tabs")} (${this.hass!.localize(
                     "ui.panel.lovelace.editor.card.config.required"
                 )})`}
             </h3>
-            <div class="dropdowns">
-                ${guard([this.dropdowns, this._renderEmptySortable], () =>
+            <div class="tabs">
+                ${guard([this.tabs, this._renderEmptySortable], () =>
                     this._renderEmptySortable
                         ? ""
-                        : this.dropdowns!.map(
-                              (dropdownConf, index) => html`
-                                  <div class="dropdown">
+                        : this.tabs!.map(
+                              (tabConf, index) => html`
+                                  <div class="tab">
                                       <div class="handle">
                                           <ha-icon icon="mdi:drag"></ha-icon>
                                       </div>
                                       ${html`
                                           <div class="special-row">
                                               <div>
-                                                  <span>
-                                                      ${this._renderDropdownLabel(
-                                                          dropdownConf
-                                                      )}</span
-                                                  >
+                                                  <span> ${this._renderTabLabel(tabConf)}</span>
                                                   <span class="secondary"
-                                                      >${this._renderDropdownSecondary(
-                                                          dropdownConf
-                                                      )}</span
+                                                      >${this._renderTabSecondary(tabConf)}</span
                                                   >
                                               </div>
                                           </div>
@@ -93,7 +80,7 @@ export class DropdownsCardEditorDropdowns extends MushroomBaseElement {
                                           .label=${customLocalize("editor.form.card-picker.clear")}
                                           class="remove-icon"
                                           .index=${index}
-                                          @click=${this._removeDropdown}
+                                          @click=${this._removeTab}
                                       >
                                           <ha-icon icon="mdi:close"></ha-icon
                                       ></ha-icon-button>
@@ -101,7 +88,7 @@ export class DropdownsCardEditorDropdowns extends MushroomBaseElement {
                                           .label=${customLocalize("editor.form.card-picker.edit")}
                                           class="edit-icon"
                                           .index=${index}
-                                          @click=${this._editDropdown}
+                                          @click=${this._editTab}
                                       >
                                           <ha-icon icon="mdi:pencil"></ha-icon>
                                       </ha-icon-button>
@@ -110,10 +97,22 @@ export class DropdownsCardEditorDropdowns extends MushroomBaseElement {
                           )
                 )}
             </div>
-            <div class="button" @click=${this._openCardPicker}>
-                ${customLocalize("editor.card.dropdown.dropdown-picker.add")}
-                <ha-icon icon="mdi:plus"></ha-icon>
-            </div>
+            <mushroom-select
+                .label=${customLocalize("editor.card.tabbed.tab-picker.add")}
+                @selected=${this._addTab}
+                @closed=${(e) => e.stopPropagation()}
+                fixedMenuPosition
+                naturalMenuWidth
+            >
+                ${TAB_LIST.map(
+                    (chip) =>
+                        html`
+                            <mwc-list-item .value=${chip}>
+                                ${customLocalize(`editor.chip.chip-picker.types.${chip}`)}
+                            </mwc-list-item>
+                        `
+                )}
+            </mushroom-select>
         `;
     }
 
@@ -121,9 +120,9 @@ export class DropdownsCardEditorDropdowns extends MushroomBaseElement {
         super.updated(changedProps);
 
         const attachedChanged = changedProps.has("_attached");
-        const dropdownsChanged = changedProps.has("dropdowns");
+        const tabsChanged = changedProps.has("tabs");
 
-        if (!dropdownsChanged && !attachedChanged) {
+        if (!tabsChanged && !attachedChanged) {
             return;
         }
 
@@ -134,20 +133,20 @@ export class DropdownsCardEditorDropdowns extends MushroomBaseElement {
             return;
         }
 
-        if (!this._sortable && this.dropdowns) {
+        if (!this._sortable && this.tabs) {
             this._createSortable();
             return;
         }
 
-        if (dropdownsChanged) {
-            this._handleDropdownsChanged();
+        if (tabsChanged) {
+            this._handleTabsChanged();
         }
     }
 
-    private async _handleDropdownsChanged() {
+    private async _handleTabsChanged() {
         this._renderEmptySortable = true;
         await this.updateComplete;
-        const container = this.shadowRoot!.querySelector(".dropdowns")!;
+        const container = this.shadowRoot!.querySelector(".tabs")!;
         while (container.lastElementChild) {
             container.removeChild(container.lastElementChild);
         }
@@ -163,100 +162,86 @@ export class DropdownsCardEditorDropdowns extends MushroomBaseElement {
             Sortable.mount(sortableImport.AutoScroll());
         }
 
-        this._sortable = new Sortable(this.shadowRoot!.querySelector(".dropdowns"), {
+        this._sortable = new Sortable(this.shadowRoot!.querySelector(".tabs"), {
             animation: 150,
             fallbackClass: "sortable-fallback",
             handle: ".handle",
-            onEnd: async (evt: SortableEvent) => this._dropdownMoved(evt),
+            onEnd: async (evt: SortableEvent) => this._tabMoved(evt),
         });
     }
 
-    private _openCardPicker(): void {
-        this._cardPicker = true;
-    }
-
-    private async _addDropdown(ev: any): Promise<void> {
+    private async _addTab(ev: any): Promise<void> {
         ev.stopPropagation();
+        const target = ev.target! as EditorTarget;
+        const value = target.value as string;
 
-        const config = ev.detail.config as LovelaceCardConfig;
-
-        if (!config) {
-            this._cardPicker = false;
+        if (value === "") {
             return;
         }
 
-        const newConfigDropdowns = this.dropdowns!.concat(config);
+        let finalTabsConfig = this.tabs || [];
 
-        fireEvent(this, "dropdowns-changed", {
-            dropdowns: newConfigDropdowns,
+        const elClass = (await customElements.get(`mushroom-${value}-card`)) as any;
+
+        if (elClass && elClass.getStubConfig) {
+            const newTabConfig = await elClass.getStubConfig(this.hass);
+            newTabConfig.layout = "vertical";
+            finalTabsConfig = finalTabsConfig.concat(newTabConfig)
+        } 
+        
+        target.value = "";
+        fireEvent(this, "tabs-changed", {
+            tabs: finalTabsConfig,
         });
-        this._cardPicker = false;
     }
 
-    private _dropdownMoved(ev: SortableEvent): void {
+    private _tabMoved(ev: SortableEvent): void {
         if (ev.oldIndex === ev.newIndex) {
             return;
         }
 
-        const newDropdowns = this.dropdowns!.concat();
+        const newTabs = this.tabs!.concat();
 
-        newDropdowns.splice(ev.newIndex!, 0, newDropdowns.splice(ev.oldIndex!, 1)[0]);
+        newTabs.splice(ev.newIndex!, 0, newTabs.splice(ev.oldIndex!, 1)[0]);
 
-        fireEvent(this, "dropdowns-changed", { dropdowns: newDropdowns });
+        fireEvent(this, "tabs-changed", { tabs: newTabs });
     }
 
-    private _removeDropdown(ev: CustomEvent): void {
+    private _removeTab(ev: CustomEvent): void {
         const index = (ev.currentTarget as any).index;
-        const newConfigDropdowns = this.dropdowns!.concat();
+        const newConfigTabs = this.tabs!.concat();
 
-        newConfigDropdowns.splice(index, 1);
+        newConfigTabs.splice(index, 1);
 
-        fireEvent(this, "dropdowns-changed", {
-            dropdowns: newConfigDropdowns,
+        fireEvent(this, "tabs-changed", {
+            tabs: newConfigTabs,
         });
     }
 
-    private _editDropdown(ev: CustomEvent): void {
+    private _editTab(ev: CustomEvent): void {
         const index = (ev.currentTarget as any).index;
         fireEvent<any>(this, "edit-detail-element", {
             subElementConfig: {
                 index,
-                type: "card",
-                elementConfig: this.dropdowns![index],
+                type: "tab",
+                elementConfig: this.tabs![index],
             },
         });
     }
 
-    private _renderDropdownLabel(dropdownConf: LovelaceCardConfig): string {
-        return dropdownConf.type
-            .replace("custom:", "")
-            .split("-")
-            .map((name) => name[0].toUpperCase() + name.substr(1))
-            .join(" ");
+    private _renderTabLabel(tabConf: LovelaceCardConfig): string {
+        return this.getEntityName(tabConf.entity);
     }
 
-    private _renderDropdownSecondary(dropdownConf: LovelaceCardConfig): string | undefined {
-        const customLocalize = setupCustomlocalize(this.hass);
-        if ("entity" in dropdownConf && dropdownConf.entity) {
-            return `${this.getEntityName(dropdownConf.entity) ?? dropdownConf.entity}`;
-        }
-        if ("entities" in dropdownConf && dropdownConf.entities) {
-            return `${this.getEntitiesType(dropdownConf.entities)}`;
-        }
-        if ("chip" in dropdownConf && dropdownConf.chip) {
-            const label = customLocalize(
-                `editor.chip.chip-picker.types.${dropdownConf.dropdown.type}`
-            );
-            return `${this._renderDropdownSecondary(dropdownConf.chip)} (via ${label})`;
-        }
-        return undefined;
+    private _renderTabSecondary(tabConf: LovelaceCardConfig): string | undefined {
+        return this.getEntityName(tabConf.entity) == tabConf.entity ? undefined : tabConf.entity;
     }
 
-    private getEntityName(entity_id: string): string | undefined {
-        if (!this.hass) return undefined;
+    private getEntityName(entity_id: string): string {
+        if (!this.hass) return entity_id;
         const entity = this.hass.states[entity_id];
-        if (!entity) return undefined;
-        return entity.attributes.friendly_name;
+        if (!entity) return "Entity Not Found";
+        return entity.attributes.friendly_name || entity_id;
     }
 
     private getEntitiesType(entities: LovelaceCardConfig[]): string | undefined {
@@ -277,7 +262,7 @@ export class DropdownsCardEditorDropdowns extends MushroomBaseElement {
             super.styles,
             sortableStyles,
             css`
-                .dropdown {
+                .tab {
                     display: flex;
                     align-items: center;
                 }
@@ -290,12 +275,12 @@ export class DropdownsCardEditorDropdowns extends MushroomBaseElement {
                     width: 100%;
                 }
 
-                .dropdown .handle {
+                .tab .handle {
                     padding-right: 8px;
                     cursor: move;
                 }
 
-                .dropdown .handle > * {
+                .tab .handle > * {
                     pointer-events: none;
                 }
 

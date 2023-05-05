@@ -8,7 +8,6 @@ import "../form/mushroom-select";
 
 const ACTION = [
     "default",
-    "dropdown",
     "more-info",
     "toggle",
     "navigate",
@@ -51,7 +50,9 @@ export class ActionPicker extends LitElement {
 
     render() {
         const customLocalize = setupCustomlocalize(this.hass);
-        const actions = this.actions || ACTION;
+        const actions = this.actions || [...ACTION];
+        if (this.dropdowns) actions.splice(1, 0, 'dropdown')
+
         return html`
             ${loadActionSelector()}
             <div class="action-select">

@@ -11,7 +11,7 @@ import {
     LovelaceConfig,
 } from "../../ha";
 import { LovelaceChipConfig } from "./chip/types";
-import { EditSubElementEvent, GUIModeChangedEvent } from "./editor/types";
+import { CardEditorOptions, EditSubElementEvent, GUIModeChangedEvent } from "./editor/types";
 import { GUISupportError } from "./gui-support-error";
 import { LovelaceGenericElementEditor } from "./types";
 
@@ -40,6 +40,8 @@ export abstract class MushroomElementEditor<T> extends LitElement {
     @property({ attribute: false }) public hass!: HomeAssistant;
 
     @property({ attribute: false }) public lovelace?: LovelaceConfig;
+    
+    @property({ attribute: false }) public options?: CardEditorOptions;
 
     @state() private _yaml?: string;
 
