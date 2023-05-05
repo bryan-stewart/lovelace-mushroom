@@ -101,7 +101,7 @@ export class RoomCard extends MushroomBaseCard implements LovelaceCard {
     }
 
     private _renderChips() {
-        if (!this._chips && this._config?.chips?.chips?.length) {
+        if (this._config?.chips?.chips?.length) {
             const config = {
                 ...this._config.chips,
                 color: this._config.chips.color || "lightblue",
@@ -119,6 +119,8 @@ export class RoomCard extends MushroomBaseCard implements LovelaceCard {
                     ></mushroom-chips-card>
                 </div>
             `;
+        } else {
+            this._chips = undefined
         }
     }
 

@@ -113,7 +113,7 @@ export class RoomCardEditor extends MushroomBaseElement implements LovelaceCardE
                     .map((name) => name[0].toUpperCase() + name.substr(1))
                     .join(" ")
             ) || [];
-        
+
         const schema = computeSchema({
             icon: this._config?.icon || entityIcon,
             dropdowns,
@@ -131,7 +131,9 @@ export class RoomCardEditor extends MushroomBaseElement implements LovelaceCardE
     }
 
     protected _renderChipsTab() {
-        const dropdowns = this._config?.dropdowns.map((d) => d.type) as ChipsCardOptions;
+        const dropdowns = this._config?.dropdowns
+            ? (this._config.dropdowns.map((d) => d.type) as ChipsCardOptions)
+            : [];
 
         return html`
             <mushroom-chips-card-editor
