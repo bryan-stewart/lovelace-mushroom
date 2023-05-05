@@ -122,7 +122,7 @@ export class ActionPicker extends LitElement {
                       >
                           <mwc-list-item .value=${"default"}> Default </mwc-list-item>
                           <mwc-list-item .value=${"close"}> Close </mwc-list-item>
-                          ${this.dropdowns.map(
+                          ${this.dropdowns && this.dropdowns.map(
                               (d, i) =>
                                   html`<mwc-list-item .value=${i + 1 + ""}
                                       >(${i + 1}) ${d}</mwc-list-item
