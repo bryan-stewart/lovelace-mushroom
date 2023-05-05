@@ -15,17 +15,17 @@ export type ActionsSharedConfig = {
     double_tap_action?: ActionConfig;
 };
 
-export const computeActionsFormSchema = (actions?: UiAction[]): HaFormSchema[] => [
+export const computeActionsFormSchema = (config?): HaFormSchema[] => [
     {
         name: "tap_action",
-        selector: { "ui-action": { actions } },
+        selector: { "mush-action": config },
     },
     {
         name: "hold_action",
-        selector: { "ui-action": { actions } },
+        selector: { "mush-action": config },
     },
     {
         name: "double_tap_action",
-        selector: { "ui-action": { actions } },
+        selector: { "mush-action": config },
     },
 ];

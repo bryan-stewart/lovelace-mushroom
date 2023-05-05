@@ -148,6 +148,11 @@ export interface CustomActionConfig extends BaseActionConfig {
     action: "fire-dom-event";
 }
 
+export interface DropdownActionConfig extends BaseActionConfig {
+    action: "dropdown" | "hold" | "tap" | "double_tap";
+    dropdown: number | string;
+}
+
 export interface BaseActionConfig {
     action: string;
     confirmation?: ConfirmationRestrictionConfig;
@@ -169,7 +174,8 @@ export type ActionConfig =
     | UrlActionConfig
     | MoreInfoActionConfig
     | NoActionConfig
-    | CustomActionConfig;
+    | CustomActionConfig
+    | DropdownActionConfig;
 
 type LovelaceUpdatedEvent = HassEventBase & {
     event_type: "lovelace_updated";

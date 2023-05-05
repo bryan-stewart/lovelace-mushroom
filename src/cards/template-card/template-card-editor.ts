@@ -11,6 +11,7 @@ import { HaFormSchema } from "../../utils/form/ha-form";
 import { loadHaComponents } from "../../utils/loader";
 import { TEMPLATE_CARD_EDITOR_NAME } from "./const";
 import { TemplateCardConfig, templateCardConfigStruct } from "./template-card-config";
+import { CardEditorOptions } from "../../utils/lovelace/editor/types";
 
 export const TEMPLATE_LABELS = [
     "badge_icon",
@@ -22,7 +23,7 @@ export const TEMPLATE_LABELS = [
     "picture",
 ];
 
-const computeSchema = memoizeOne((): HaFormSchema[] => [
+const computeSchema = memoizeOne(({ dropdowns }: CardEditorOptions): HaFormSchema[] => [
     { name: "entity", selector: { entity: {} } },
     {
         name: "icon",
@@ -61,11 +62,13 @@ const computeSchema = memoizeOne((): HaFormSchema[] => [
             { name: "multiline_secondary", selector: { boolean: {} } },
         ],
     },
-    ...computeActionsFormSchema(),
+    ...computeActionsFormSchema({ dropdowns }),
 ]);
 
 @customElement(TEMPLATE_CARD_EDITOR_NAME)
 export class TemplateCardEditor extends MushroomBaseElement implements LovelaceCardEditor {
+    @state() private options?: CardEditorOptions;
+    
     @state() private _config?: TemplateCardConfig;
 
     connectedCallback() {
@@ -100,7 +103,9 @@ export class TemplateCardEditor extends MushroomBaseElement implements LovelaceC
             return nothing;
         }
 
-        const schema = computeSchema();
+        const schema = computeSchema({
+            dropdowns: this.options?.dropdowns,
+        });
         return html`
             <ha-form
                 .hass=${this.hass}

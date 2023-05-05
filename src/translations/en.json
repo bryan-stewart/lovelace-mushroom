@@ -39,6 +39,22 @@
                     "center": "Center",
                     "justify": "Justify"
                 }
+            },
+            "action_picker": {
+                "values": {
+                    "default": "Default Action",
+                    "dropdown": "Dropdown",
+                    "more-info": "More Info",
+                    "toggle": "Toggle",
+                    "navigate": "Navigate",
+                    "url": "Url",
+                    "call-service": "Call Service",
+                    "none": "No Action"
+                }
+            },
+            "card-picker": {
+                "edit": "Edit",
+                "clear": "Clear"
             }
         },
         "card": {
@@ -144,6 +160,21 @@
                     "slider": "Slider",
                     "buttons": "Buttons"
                 }
+                       },
+            "dropdown": {
+                "dropdown-picker": {
+                    "dropdowns": "Dropdowns",
+                    "add": "Add Dropdown"
+                }
+            },
+            "tabbed": {
+                "tab-picker": {
+                    "tabs": "Tabs",
+                    "add": "Add Tab"
+                }
+            },
+            "sub_element_editor": {
+                "title": "Card editor"
             }
         },
         "chip": {
@@ -171,6 +202,11 @@
                     "template": "Template",
                     "weather": "Weather"
                 }
+            }
+        },
+        "tab": {
+            "sub_element_editor": {
+                "title": "Tab editor"
             }
         }
     },
