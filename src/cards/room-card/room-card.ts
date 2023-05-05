@@ -50,6 +50,41 @@ export class RoomCard extends MushroomBaseCard implements LovelaceCard {
         return {
             type: `custom:${ROOM_CARD_NAME}`,
             entity: entities[0],
+            tap_action: {
+                action: 'dropdown',
+                dropdown: 'close'
+            },
+            dropdowns: [
+                {
+                    type: "entities",
+                    entities: entities.slice(2, 5),
+                },
+                {
+                    type: "gauge",
+                    entity: entities[5],
+                },
+            ],
+            chips: {
+                chips: [
+                    {
+                        type: "entity",
+                        entity: entities[6],
+                        tap_action: {
+                            action: 'dropdown',
+                            dropdown: '1'
+                        }
+                    },
+                    {
+                        type: "entity",
+                        entity: entities[7],
+                        tap_action: {
+                            action: 'dropdown',
+                            dropdown: '2'
+                        }
+                    },
+                ],
+                alignment: "end",
+            },
         };
     }
 
