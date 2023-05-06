@@ -29,7 +29,7 @@ registerCustomCard({
     description: "Card with dropdowns",
 });
 
-const ALLOWED_TABS = ["custom:mushroom-entity-card", "custom:mushroom-template-card"];
+const ALLOWED_TABS = ["custom:mushroom-entity-card", "custom:mushroom-person-card", "custom:mushroom-template-card"];
 
 @customElement(TABBED_CARD_NAME)
 export class TabbedCard extends MushroomBaseCard implements LovelaceCard {
@@ -158,6 +158,7 @@ export class TabbedCard extends MushroomBaseCard implements LovelaceCard {
             }
 
             let tab;
+
             if (ALLOWED_TABS.includes(tabConfig.type)) {
                 tab = createCardElement(tabConfig);
                 if (tab) {

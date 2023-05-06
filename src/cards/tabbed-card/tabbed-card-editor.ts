@@ -4,14 +4,19 @@ import { assert } from "superstruct";
 import { fireEvent, HASSDomEvent, LovelaceCardConfig, LovelaceCardEditor } from "../../ha";
 import { MushroomBaseElement } from "../../utils/base-element";
 import { loadHaComponents } from "../../utils/loader";
-import { CardEditorOptions, EditorTarget, EditSubElementEvent, SubElementEditorConfig } from "../../utils/lovelace/editor/types";
+import {
+    CardEditorOptions,
+    EditorTarget,
+    EditSubElementEvent,
+    SubElementEditorConfig,
+} from "../../utils/lovelace/editor/types";
 import { TABBED_CARD_EDITOR_NAME } from "./const";
 import { TabbedCardConfig, tabbedCardConfigStruct } from "./tabbed-card-config";
 import setupCustomlocalize from "../../localize";
 import "../../utils/lovelace/sub-element-editor";
 import "../../utils/lovelace/feature-element-editor";
 
-const TAB_LIST = ["entity", "template"];
+const TAB_LIST = ["entity", "person", "template"];
 
 @customElement(TABBED_CARD_EDITOR_NAME)
 export class TabbedCardEditor extends MushroomBaseElement implements LovelaceCardEditor {
@@ -97,10 +102,10 @@ export class TabbedCardEditor extends MushroomBaseElement implements LovelaceCar
                     naturalMenuWidth
                 >
                     ${TAB_LIST.map(
-                        (chip) =>
+                        (tab) =>
                             html`
-                                <mwc-list-item .value=${chip}>
-                                    ${customLocalize(`editor.chip.chip-picker.types.${chip}`)}
+                                <mwc-list-item .value=${tab}>
+                                    ${customLocalize(`editor.chip.chip-picker.types.${tab}`)}
                                 </mwc-list-item>
                             `
                     )}
@@ -127,9 +132,7 @@ export class TabbedCardEditor extends MushroomBaseElement implements LovelaceCar
                 .hass=${this.hass}
                 .lovelace=${this.lovelace}
                 .features=${this._config!.dropdowns || []}
-                .label="${customLocalize(
-                    "editor.card.dropdown.dropdown-picker.dropdowns"
-                )} (${this.hass!.localize("ui.panel.lovelace.editor.card.config.required")})"
+                .label="${customLocalize("editor.card.dropdown.dropdown-picker.dropdowns")}"
                 .type=${"dropdown"}
                 @features-changed=${this._dropdownsChanged}
                 @edit-detail-element=${this._editDetailElement}
@@ -161,6 +164,7 @@ export class TabbedCardEditor extends MushroomBaseElement implements LovelaceCar
             finalTabsConfig = finalTabsConfig.concat(newTabConfig);
         }
 
+        target.value = "";
         fireEvent(this, "config-changed", {
             config: { ...this._config, tabs: finalTabsConfig } as any,
         });

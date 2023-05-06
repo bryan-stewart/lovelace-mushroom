@@ -214,6 +214,7 @@
                     "entity": "Entity",
                     "light": "Light",
                     "menu": "Menu",
+                    "person": "Person",
                     "spacer": "Spacer",
                     "template": "Template",
                     "weather": "Weather"
