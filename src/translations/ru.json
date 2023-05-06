@@ -39,6 +39,11 @@
                     "center": "По-центру",
                     "justify": "На всю ширину"
                 }
+            },
+            "sub_element_editor": {
+                "chip": {
+                    "title": "Редактор мини-карточек"
+                }
             }
         },
         "card": {
@@ -134,9 +139,6 @@
             }
         },
         "chip": {
-            "sub_element_editor": {
-                "title": "Редактор мини-карточек"
-            },
             "conditional": {
                 "chip": "Мини-карточка"
             },

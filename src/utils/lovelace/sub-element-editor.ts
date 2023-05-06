@@ -44,7 +44,7 @@ export class MushroomSubElementEditor extends LitElement {
                     </ha-icon-button>
                     <span slot="title"
                         >${customLocalize(
-                            `editor.${this.config.type}.sub_element_editor.title`
+                            `editor.form.sub_element_editor.${this.config.type}.title`
                         )}</span
                     >
                 </div>

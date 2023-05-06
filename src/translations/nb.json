@@ -31,6 +31,11 @@
                     "center": "Senter",
                     "justify": "Bekreft"
                 }
+            },
+            "sub_element_editor": {
+                "chip": {
+                    "title": "Chip redaktør"
+                }
             }
         },
         "card": {
@@ -81,9 +86,6 @@
             }
         },
         "chip": {
-            "sub_element_editor": {
-                "title": "Chip redaktør"
-            },
             "conditional": {
                 "chip": "Chip"
             },

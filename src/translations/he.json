@@ -31,6 +31,11 @@
                     "center": "אמצע",
                     "justify": "מוצדק"
                 }
+            },
+            "sub_element_editor": {
+                "chip": {
+                    "title": "עורך שבב"
+                }
             }
         },
         "card": {
@@ -118,9 +123,6 @@
             }
         },
         "chip": {
-            "sub_element_editor": {
-                "title": "עורך שבב"
-            },
             "conditional": {
                 "chip": "שבב"
             },

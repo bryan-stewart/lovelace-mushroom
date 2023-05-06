@@ -31,6 +31,11 @@
                     "center": "Ortala",
                     "justify": "İki yana yasla"
                 }
+            },
+            "sub_element_editor": {
+                "chip": {
+                    "title": "Chip düzenleyici"
+                }
             }
         },
         "card": {
@@ -84,9 +89,6 @@
             }
         },
         "chip": {
-            "sub_element_editor": {
-                "title": "Chip düzenleyici"
-            },
             "conditional": {
                 "chip": "Chip"
             },

@@ -39,6 +39,11 @@
                     "center": "Na střed",
                     "justify": "Do bloku"
                 }
+            },
+            "sub_element_editor": {
+                "chip": {
+                    "title": "Editor tlačítek"
+                }
             }
         },
         "card": {
@@ -133,9 +138,6 @@
             }
         },
         "chip": {
-            "sub_element_editor": {
-                "title": "Editor tlačítek"
-            },
             "conditional": {
                 "chip": "Tlačítko"
             },

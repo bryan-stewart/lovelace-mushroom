@@ -21,16 +21,17 @@ import "../../shared/editor/alignment-picker";
 import "../../shared/editor/size-picker";
 import { MushroomBaseElement } from "../../utils/base-element";
 import { loadHaComponents } from "../../utils/loader";
-import { LovelaceChipConfig } from "../../utils/lovelace/chip/types";
+import { CHIP_LIST, LovelaceChipConfig } from "../../utils/lovelace/chip/types";
 import {
     EditorTarget,
     EditSubElementEvent,
     SubElementEditorConfig,
 } from "../../utils/lovelace/editor/types";
-import "../../utils/lovelace/sub-element-editor";
 import { ChipsCardConfig, ChipsCardOptions } from "./chips-card";
-import "./chips-card-chips-editor";
 import { CHIPS_CARD_EDITOR_NAME } from "./const";
+import { getChipElementClass } from "../../utils/lovelace/chip-element-editor";
+import "../../utils/lovelace/sub-element-editor";
+import "../../utils/lovelace/feature-element-editor";
 
 const actionChipConfigStruct = object({
     type: literal("action"),
@@ -152,6 +153,8 @@ const cardConfigStruct = assign(
     })
 );
 
+const NON_EDITABLE_CHIPS: LovelaceChipConfig["type"][] = ['spacer']
+
 @customElement(CHIPS_CARD_EDITOR_NAME)
 export class ChipsCardEditor extends MushroomBaseElement implements LovelaceCardEditor {
     @state() private _config?: ChipsCardConfig;
@@ -221,13 +224,60 @@ export class ChipsCardEditor extends MushroomBaseElement implements LovelaceCard
                 >
                 </mushroom-size-picker>
             </div>
-            <mushroom-chips-card-chips-editor
+            <mushroom-feature-editor
                 .hass=${this.hass}
-                .chips=${this._config!.chips}
-                @chips-changed=${this._valueChanged}
+                .features=${this._config!.chips}
+                .label="${customLocalize("editor.chip.chip-picker.chips")} (${this.hass!.localize(
+                    "ui.panel.lovelace.editor.card.config.required"
+                )})"
+                .type=${"chip"}
+                .uneditable=${NON_EDITABLE_CHIPS}
+                @features-changed=${this._valueChanged}
                 @edit-detail-element=${this._editDetailElement}
-            ></mushroom-chips-card-chips-editor>
+            >
+                <mushroom-select
+                    slot="add"
+                    .label=${customLocalize("editor.chip.chip-picker.add")}
+                    @selected=${this._addChip}
+                    @closed=${(e) => e.stopPropagation()}
+                    fixedMenuPosition
+                    naturalMenuWidth
+                >
+                    ${CHIP_LIST.map(
+                        (feature) =>
+                            html`
+                                <mwc-list-item .value=${feature}>
+                                    ${customLocalize(`editor.chip.chip-picker.types.${feature}`)}
+                                </mwc-list-item>
+                            `
+                    )}
+                </mushroom-select></mushroom-feature-editor
+            >
         `;
+    }
+
+    private async _addChip(ev: any): Promise<void> {
+        const target = ev.target! as EditorTarget;
+        const value = target.value as string;
+
+        if (value === "") {
+            return;
+        }
+
+        let newChip: LovelaceChipConfig;
+
+        // Check if a stub config exists
+        const elClass = getChipElementClass(value) as any;
+
+        if (elClass && elClass.getStubConfig) {
+            newChip = (await elClass.getStubConfig(this.hass)) as LovelaceChipConfig;
+        } else {
+            newChip = { type: value } as LovelaceChipConfig;
+        }
+
+        const chips = (this._config?.chips || []).concat(newChip);
+        target.value = "";
+        fireEvent(this, "config-changed", { config: { ...this._config, chips }as ChipsCardConfig });
     }
 
     private _valueChanged(ev: CustomEvent): void {
@@ -235,22 +285,11 @@ export class ChipsCardEditor extends MushroomBaseElement implements LovelaceCard
             return;
         }
         const target = ev.target! as EditorTarget;
-        const configValue = target.configValue || this._subElementEditorConfig?.type;
-        const value = target.checked ?? ev.detail.value ?? target.value;
+        const configValue = target.configValue || ev.detail.type
+        const value = ev.detail.value
 
-        if (configValue === "chip" || (ev.detail && ev.detail.chips)) {
-            const newConfigChips = ev.detail.chips || this._config!.chips.concat();
-            if (configValue === "chip") {
-                if (!value) {
-                    newConfigChips.splice(this._subElementEditorConfig!.index!, 1);
-                    this._goBack();
-                } else {
-                    newConfigChips[this._subElementEditorConfig!.index!] = value;
-                }
-
-                this._subElementEditorConfig!.elementConfig = value;
-            }
-
+        if (configValue === "chip" && (ev.detail && ev.detail.features)) {
+            const newConfigChips = ev.detail.features || this._config!.chips.concat()
             this._config = { ...this._config!, chips: newConfigChips };
         } else if (configValue) {
             if (!value) {
@@ -275,7 +314,7 @@ export class ChipsCardEditor extends MushroomBaseElement implements LovelaceCard
 
         const configValue = this._subElementEditorConfig?.type;
         const value = ev.detail.config;
-
+        
         if (configValue === "chip") {
             const newConfigChips = this._config!.chips!.concat();
             if (!value) {
@@ -286,16 +325,6 @@ export class ChipsCardEditor extends MushroomBaseElement implements LovelaceCard
             }
 
             this._config = { ...this._config!, chips: newConfigChips };
-        } else if (configValue) {
-            if (value === "") {
-                this._config = { ...this._config };
-                delete this._config[configValue!];
-            } else {
-                this._config = {
-                    ...this._config,
-                    [configValue]: value,
-                };
-            }
         }
 
         this._subElementEditorConfig = {
@@ -320,6 +349,9 @@ export class ChipsCardEditor extends MushroomBaseElement implements LovelaceCard
                 .card-config > * {
                     margin-bottom: 24px;
                     display: block;
+                }
+                mushroom-select {
+                    width: 100%;
                 }
             `,
         ];

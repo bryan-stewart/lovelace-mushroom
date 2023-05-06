@@ -30,6 +30,11 @@
                     "center": "Centrado",
                     "justify": "Justificado"
                 }
+            },
+            "sub_element_editor": {
+                "chip": {
+                    "title": "Editor de fichas"
+                }
             }
         },
         "card": {
@@ -75,9 +80,6 @@
             }
         },
         "chip": {
-            "sub_element_editor": {
-                "title": "Editor de fichas"
-            },
             "conditional": {
                 "chip": "Ficha"
             },

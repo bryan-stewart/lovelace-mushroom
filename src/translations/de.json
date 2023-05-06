@@ -39,6 +39,11 @@
                     "center": "Mitte",
                     "justify": "Ausrichten"
                 }
+            },
+            "sub_element_editor": {
+                "chip": {
+                    "title": "Chip Editor"
+                }
             }
         },
         "card": {
@@ -147,9 +152,6 @@
             }
         },
         "chip": {
-            "sub_element_editor": {
-                "title": "Chip Editor"
-            },
             "conditional": {
                 "chip": "Chip"
             },

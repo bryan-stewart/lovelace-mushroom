@@ -2,7 +2,7 @@ import { css, CSSResultGroup, html, TemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import memoizeOne from "memoize-one";
 import { assert } from "superstruct";
-import { fireEvent, HASSDomEvent, LovelaceCardEditor } from "../../ha";
+import { fireEvent, HASSDomEvent, LovelaceCardConfig, LovelaceCardEditor } from "../../ha";
 import setupCustomlocalize from "../../localize";
 import { computeActionsFormSchema } from "../../shared/config/actions-config";
 import { APPEARANCE_FORM_SCHEMA } from "../../shared/config/appearance-config";
@@ -19,7 +19,8 @@ import {
 import { ChipsCardOptions } from "../chips-card/chips-card";
 import { ROOM_CARD_EDITOR_NAME } from "./const";
 import { RoomCardConfig, roomCardConfigStruct } from "./room-card-config";
-import "../../utils/lovelace/dropdowns-element-editor";
+import "../../utils/lovelace/sub-element-editor";
+import "../../utils/lovelace/feature-element-editor";
 
 const computeSchema = memoizeOne(({ icon, dropdowns }: CardEditorOptions): HaFormSchema[] => [
     { name: "entity", selector: { entity: {} } },
@@ -39,6 +40,8 @@ const computeSchema = memoizeOne(({ icon, dropdowns }: CardEditorOptions): HaFor
 @customElement(ROOM_CARD_EDITOR_NAME)
 export class RoomCardEditor extends MushroomBaseElement implements LovelaceCardEditor {
     @state() private _config?: RoomCardConfig;
+
+    @state() private _cardPicker: boolean = false;
 
     @state() private _subElementEditorConfig?: SubElementEditorConfig;
 
@@ -149,31 +152,74 @@ export class RoomCardEditor extends MushroomBaseElement implements LovelaceCardE
     protected _renderDropdownsTab() {
         if (!this._config) return html``;
 
+        const customLocalize = setupCustomlocalize(this.hass);
+
+        if (this._cardPicker) {
+            return html`<hui-card-picker
+                .lovelace=${this.lovelace}
+                .hass=${this.hass}
+                @config-changed=${this._addDropdown}
+            ></hui-card-picker>`;
+        }
+
         return html`
-            <mushroom-dropdowns-editor
+            <mushroom-feature-editor
                 .hass=${this.hass}
                 .lovelace=${this.lovelace}
-                .dropdowns=${this._config.dropdowns || []}
-                @dropdowns-changed=${this._dropdownsChanged}
+                .features=${this._config!.dropdowns || []}
+                .label="${customLocalize(
+                    "editor.card.dropdown.dropdown-picker.dropdowns"
+                )} (${this.hass!.localize("ui.panel.lovelace.editor.card.config.required")})"
+                .type=${"dropdown"}
+                @features-changed=${this._dropdownsChanged}
                 @edit-detail-element=${this._editDetailElement}
-            ></mushroom-dropdowns-editor>
+            >
+                <div slot="add" class="button" @click=${this._openCardPicker}>
+                    ${customLocalize("editor.card.dropdown.dropdown-picker.add")}
+                    <ha-icon icon="mdi:plus"></ha-icon>
+                </div>
+            </mushroom-feature-editor>
         `;
+    }
+
+    private async _addDropdown(ev: any): Promise<void> {
+        ev.stopPropagation();
+
+        const config = ev.detail.config as LovelaceCardConfig;
+
+        if (!config) {
+            this._cardPicker = false;
+            return;
+        }
+
+        const newConfigDropdowns = (this._config?.dropdowns || []).concat(config);
+
+        fireEvent(this, "config-changed", {
+            config: { ...this._config, dropdowns: newConfigDropdowns } as any,
+        });
+        this._cardPicker = false;
     }
 
     private _valueChanged(ev: CustomEvent): void {
         fireEvent(this, "config-changed", { config: ev.detail.value });
     }
+
     private _chipsChanged(ev): void {
         ev.stopPropagation();
         fireEvent(this, "config-changed", {
             config: { ...this._config, chips: ev.detail.config } as any,
         });
     }
+    
     private _dropdownsChanged(ev): void {
         ev.stopPropagation();
         fireEvent(this, "config-changed", {
-            config: { ...this._config, dropdowns: ev.detail.dropdowns } as any,
+            config: { ...this._config, dropdowns: ev.detail.features } as any,
         });
+    }
+
+    private _openCardPicker(): void {
+        this._cardPicker = true;
     }
 
     private _rerender() {
@@ -204,7 +250,7 @@ export class RoomCardEditor extends MushroomBaseElement implements LovelaceCardE
             }
 
             this._config = { ...this._config!, chips: newConfigChips };
-        } else if (configValue === "card") {
+        } else if (configValue === "dropdown") {
             const newConfigDropdowns = this._config!.dropdowns!.concat();
             if (!value) {
                 newConfigDropdowns.splice(this._subElementEditorConfig!.index!, 1);
@@ -214,16 +260,6 @@ export class RoomCardEditor extends MushroomBaseElement implements LovelaceCardE
             }
 
             this._config = { ...this._config!, dropdowns: newConfigDropdowns };
-        } else if (configValue) {
-            if (value === "") {
-                this._config = { ...this._config };
-                delete this._config[configValue!];
-            } else {
-                this._config = {
-                    ...this._config,
-                    [configValue]: value,
-                };
-            }
         }
 
         this._subElementEditorConfig = {
@@ -252,6 +288,17 @@ export class RoomCardEditor extends MushroomBaseElement implements LovelaceCardE
                 #editor {
                     padding: 8px;
                     margin-top: 12px;
+                }
+                .button {
+                    height: 50px;
+                    width: 100%;
+                    cursor: pointer;
+                    background-color: var(--mdc-select-fill-color, whitesmoke);
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding-left: 12px;
+                    padding-right: 12px;
                 }
             `,
         ];

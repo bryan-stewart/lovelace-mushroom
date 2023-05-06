@@ -39,6 +39,11 @@
                     "center": "Wyśrodkowanie",
                     "justify": "Justowanie"
                 }
+            },
+            "sub_element_editor": {
+                "chip": {
+                    "title": "Edytor czipów"
+                }
             }
         },
         "card": {
@@ -134,9 +139,6 @@
             }
         },
         "chip": {
-            "sub_element_editor": {
-                "title": "Edytor czipów"
-            },
             "conditional": {
                 "chip": "Czip"
             },

@@ -31,6 +31,11 @@
                     "center": "Căn giữa",
                     "justify": "Căn hai bên"
                 }
+            },
+            "sub_element_editor": {
+                "chip": {
+                    "title": "Chỉnh sửa chip"
+                }
             }
         },
         "card": {
@@ -113,9 +118,6 @@
             }
         },
         "chip": {
-            "sub_element_editor": {
-                "title": "Chỉnh sửa chip"
-            },
             "conditional": {
                 "chip": "Chip"
             },

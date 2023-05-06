@@ -1,19 +1,24 @@
 import { css, CSSResultGroup, html, TemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { assert } from "superstruct";
-import { fireEvent, HASSDomEvent, LovelaceCardEditor } from "../../ha";
+import { fireEvent, HASSDomEvent, LovelaceCardConfig, LovelaceCardEditor } from "../../ha";
 import { MushroomBaseElement } from "../../utils/base-element";
 import { loadHaComponents } from "../../utils/loader";
-import { CardEditorOptions, EditSubElementEvent, SubElementEditorConfig } from "../../utils/lovelace/editor/types";
+import { CardEditorOptions, EditorTarget, EditSubElementEvent, SubElementEditorConfig } from "../../utils/lovelace/editor/types";
 import { TABBED_CARD_EDITOR_NAME } from "./const";
 import { TabbedCardConfig, tabbedCardConfigStruct } from "./tabbed-card-config";
-import "../../utils/lovelace/dropdowns-element-editor";
-import "./tabbed-card-tab-editor";
+import setupCustomlocalize from "../../localize";
+import "../../utils/lovelace/sub-element-editor";
+import "../../utils/lovelace/feature-element-editor";
+
+const TAB_LIST = ["entity", "template"];
 
 @customElement(TABBED_CARD_EDITOR_NAME)
 export class TabbedCardEditor extends MushroomBaseElement implements LovelaceCardEditor {
     @state() private _config?: TabbedCardConfig;
     @state() private _options?: CardEditorOptions;
+
+    @state() private _cardPicker: boolean = false;
 
     @state() private _subElementEditorConfig?: SubElementEditorConfig;
 
@@ -69,41 +74,132 @@ export class TabbedCardEditor extends MushroomBaseElement implements LovelaceCar
     protected _renderTabsTab() {
         if (!this._config) return html``;
 
+        const customLocalize = setupCustomlocalize(this.hass);
+
         return html`
-            <mushroom-tabs-editor
+            <mushroom-feature-editor
                 .hass=${this.hass}
                 .lovelace=${this.lovelace}
-                .tabs=${this._config.tabs || []}
-                @tabs-changed=${this._featuresChanged}
+                .features=${this._config!.tabs || []}
+                .label="${customLocalize(
+                    "editor.card.tabbed.tab-picker.tabs"
+                )} (${this.hass!.localize("ui.panel.lovelace.editor.card.config.required")})"
+                .type=${"tab"}
+                @features-changed=${this._tabsChanged}
                 @edit-detail-element=${this._editDetailElement}
-            ></mushroom-tabs-editor>
+            >
+                <mushroom-select
+                    slot="add"
+                    .label=${customLocalize("editor.card.tabbed.tab-picker.add")}
+                    @selected=${this._addTab}
+                    @closed=${(e) => e.stopPropagation()}
+                    fixedMenuPosition
+                    naturalMenuWidth
+                >
+                    ${TAB_LIST.map(
+                        (chip) =>
+                            html`
+                                <mwc-list-item .value=${chip}>
+                                    ${customLocalize(`editor.chip.chip-picker.types.${chip}`)}
+                                </mwc-list-item>
+                            `
+                    )}
+                </mushroom-select>
+            </mushroom-feature-editor>
         `;
     }
 
     protected _renderDropdownsTab() {
         if (!this._config) return html``;
 
+        const customLocalize = setupCustomlocalize(this.hass);
+
+        if (this._cardPicker) {
+            return html`<hui-card-picker
+                .lovelace=${this.lovelace}
+                .hass=${this.hass}
+                @config-changed=${this._addDropdown}
+            ></hui-card-picker>`;
+        }
+
         return html`
-            <mushroom-dropdowns-editor
+            <mushroom-feature-editor
                 .hass=${this.hass}
                 .lovelace=${this.lovelace}
-                .dropdowns=${this._config.dropdowns || []}
-                @dropdowns-changed=${this._featuresChanged}
+                .features=${this._config!.dropdowns || []}
+                .label="${customLocalize(
+                    "editor.card.dropdown.dropdown-picker.dropdowns"
+                )} (${this.hass!.localize("ui.panel.lovelace.editor.card.config.required")})"
+                .type=${"dropdown"}
+                @features-changed=${this._dropdownsChanged}
                 @edit-detail-element=${this._editDetailElement}
-            ></mushroom-dropdowns-editor>
+            >
+                <div slot="add" class="button" @click=${this._openCardPicker}>
+                    ${customLocalize("editor.card.dropdown.dropdown-picker.add")}
+                    <ha-icon icon="mdi:plus"></ha-icon>
+                </div>
+            </mushroom-feature-editor>
         `;
     }
 
-    private _featuresChanged(ev): void {
+    private async _addTab(ev: any): Promise<void> {
         ev.stopPropagation();
-        const feature = ev.type.split("-")[0]
-        const value = ev.detail[feature]
+        const target = ev.target! as EditorTarget;
+        const value = target.value as string;
+
+        if (value === "") {
+            return;
+        }
+
+        let finalTabsConfig = this._config?.tabs || [];
+
+        const elClass = (await customElements.get(`mushroom-${value}-card`)) as any;
+
+        if (elClass && elClass.getStubConfig) {
+            const newTabConfig = await elClass.getStubConfig(this.hass);
+            newTabConfig.layout = "vertical";
+            finalTabsConfig = finalTabsConfig.concat(newTabConfig);
+        }
+
         fireEvent(this, "config-changed", {
-            config: {
-                ...this._config,
-                [feature]: value,
-            } as any,
+            config: { ...this._config, tabs: finalTabsConfig } as any,
         });
+    }
+
+    private _tabsChanged(ev): void {
+        ev.stopPropagation();
+        fireEvent(this, "config-changed", {
+            config: { ...this._config, tabs: ev.detail.features } as any,
+        });
+    }
+
+    private async _addDropdown(ev: any): Promise<void> {
+        ev.stopPropagation();
+
+        const config = ev.detail.config as LovelaceCardConfig;
+
+        if (!config) {
+            this._cardPicker = false;
+            return;
+        }
+
+        const newConfigDropdowns = (this._config?.dropdowns || []).concat(config);
+
+        fireEvent(this, "config-changed", {
+            config: { ...this._config, dropdowns: newConfigDropdowns } as any,
+        });
+        this._cardPicker = false;
+    }
+
+    private _dropdownsChanged(ev): void {
+        ev.stopPropagation();
+        fireEvent(this, "config-changed", {
+            config: { ...this._config, dropdowns: ev.detail.features } as any,
+        });
+    }
+
+    private _openCardPicker(): void {
+        this._cardPicker = true;
     }
 
     private _handleSwitchTab(ev: CustomEvent) {
@@ -116,11 +212,12 @@ export class TabbedCardEditor extends MushroomBaseElement implements LovelaceCar
         if (!this._config || !this.hass) {
             return;
         }
+        console.log(ev);
 
         const configValue = this._subElementEditorConfig?.type;
         const value = ev.detail.config;
 
-        if (configValue === "card") {
+        if (configValue === "dropdown") {
             const newConfigDropdowns = this._config!.dropdowns!.concat();
             if (!value) {
                 newConfigDropdowns.splice(this._subElementEditorConfig!.index!, 1);
@@ -130,8 +227,7 @@ export class TabbedCardEditor extends MushroomBaseElement implements LovelaceCar
             }
 
             this._config = { ...this._config!, dropdowns: newConfigDropdowns };
-        } 
-        if (configValue === "tab") {
+        } else if (configValue === "tab") {
             const newConfigTabs = this._config!.tabs!.concat();
             if (!value) {
                 newConfigTabs.splice(this._subElementEditorConfig!.index!, 1);
@@ -141,7 +237,7 @@ export class TabbedCardEditor extends MushroomBaseElement implements LovelaceCar
             }
 
             this._config = { ...this._config!, tabs: newConfigTabs };
-        } 
+        }
 
         this._subElementEditorConfig = {
             ...this._subElementEditorConfig!,
@@ -169,6 +265,20 @@ export class TabbedCardEditor extends MushroomBaseElement implements LovelaceCar
                 #editor {
                     padding: 8px;
                     margin-top: 12px;
+                }
+                mushroom-select {
+                    width: 100%;
+                }
+                .button {
+                    height: 50px;
+                    width: 100%;
+                    cursor: pointer;
+                    background-color: var(--mdc-select-fill-color, whitesmoke);
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding-left: 12px;
+                    padding-right: 12px;
                 }
             `,
         ];

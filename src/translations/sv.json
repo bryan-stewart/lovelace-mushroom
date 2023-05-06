@@ -30,6 +30,11 @@
                     "center": "Centrerad",
                     "justify": "Anpassa"
                 }
+            },
+            "sub_element_editor": {
+                "chip": {
+                    "title": "Chipredigerare"
+                }
             }
         },
         "card": {
@@ -75,9 +80,6 @@
             }
         },
         "chip": {
-            "sub_element_editor": {
-                "title": "Chipredigerare"
-            },
             "conditional": {
                 "chip": "Chip"
             },

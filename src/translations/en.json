@@ -63,9 +63,19 @@
                     "custom": "Custom"
                 }
             },
-            "card_picker": {
-                "edit": "Edit",
-                "clear": "Clear"
+            "sub_element_editor": {
+                "card": {
+                    "title": "Card editor"
+                },
+                "tab": {
+                    "title": "Tab editor"
+                },
+                "dropdown": {
+                    "title": "Dropdown editor"
+                },
+                "chip": {
+                    "title": "Chip editor"
+                }
             }
         },
         "card": {
@@ -184,15 +194,9 @@
                     "tabs": "Tabs",
                     "add": "Add Tab"
                 }
-            },
-            "sub_element_editor": {
-                "title": "Card editor"
             }
         },
         "chip": {
-            "sub_element_editor": {
-                "title": "Chip editor"
-            },
             "conditional": {
                 "chip": "Chip"
             },
@@ -214,11 +218,6 @@
                     "template": "Template",
                     "weather": "Weather"
                 }
-            }
-        },
-        "tab": {
-            "sub_element_editor": {
-                "title": "Tab editor"
             }
         }
     },

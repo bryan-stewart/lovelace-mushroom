@@ -39,7 +39,12 @@
                   "center": "중앙",
                   "justify": "행 정렬"
               }
-          }
+          },
+            "sub_element_editor": {
+                "chip": {
+                   "title": "칩 에디터" 
+                }
+            }
       },
       "card": {
           "generic": {
@@ -139,9 +144,6 @@
           }
       },
       "chip": {
-          "sub_element_editor": {
-              "title": "칩 에디터"
-          },
           "conditional": {
               "chip": "칩"
           },

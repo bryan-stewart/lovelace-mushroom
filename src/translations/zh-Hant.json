@@ -39,6 +39,11 @@
                     "center": "居中對齊",
                     "justify": "兩端對齊"
                 }
+            },
+            "sub_element_editor": {
+                "chip": {
+                    "title": "小卡片編輯器"
+                }
             }
         },
         "card": {
@@ -147,9 +152,6 @@
 			}
         },
         "chip": {
-            "sub_element_editor": {
-                "title": "小卡片編輯器"
-            },
             "conditional": {
                 "chip": "小卡片"
             },

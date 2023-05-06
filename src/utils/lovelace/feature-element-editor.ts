@@ -2,32 +2,32 @@ import { css, CSSResultGroup, html, nothing, PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { guard } from "lit/directives/guard.js";
 import type { SortableEvent } from "sortablejs";
-import { fireEvent, sortableStyles } from "../../ha";
+import { fireEvent, LovelaceCardConfig, sortableStyles } from "../../ha";
 import setupCustomlocalize from "../../localize";
-import "../../shared/form/mushroom-select";
-import { MushroomBaseElement } from "../../utils/base-element";
-import { getChipElementClass } from "../../utils/lovelace/chip-element-editor";
-import { CHIP_LIST, LovelaceChipConfig } from "../../utils/lovelace/chip/types";
-import { EditorTarget } from "../../utils/lovelace/editor/types";
+import { MushroomBaseElement } from "../base-element";
+import { LovelaceChipConfig } from "./chip/types";
 import { HassEntity } from "home-assistant-js-websocket";
 
 let Sortable;
 
 declare global {
     interface HASSDomEvents {
-        "chips-changed": {
-            chips: LovelaceChipConfig[];
+        "features-changed": {
+            features: LovelaceChipConfig[] | LovelaceCardConfig[];
+            type: string;
         };
     }
 }
 
-const NON_EDITABLE_CHIPS = new Set<LovelaceChipConfig["type"]>(["spacer"]);
+@customElement("mushroom-feature-editor")
+export class FeaturesEditor extends MushroomBaseElement {
+    @property({ attribute: false }) protected features?: LovelaceChipConfig[];
 
-@customElement("mushroom-chips-card-chips-editor")
-export class ChipsCardEditorChips extends MushroomBaseElement {
-    @property({ attribute: false }) protected chips?: LovelaceChipConfig[];
+    @property() protected type: string = "card";
 
     @property() protected label?: string;
+
+    @property() protected uneditable: string[] = [];
 
     @state() private _attached = false;
 
@@ -46,40 +46,37 @@ export class ChipsCardEditorChips extends MushroomBaseElement {
     }
 
     protected render() {
-        if (!this.chips || !this.hass) {
+        if (!this.features || !this.hass) {
             return nothing;
         }
 
         const customLocalize = setupCustomlocalize(this.hass);
 
         return html`
-            <h3>
-                ${this.label ||
-                `${customLocalize("editor.chip.chip-picker.chips")} (${this.hass!.localize(
-                    "ui.panel.lovelace.editor.card.config.required"
-                )})`}
-            </h3>
-            <div class="chips">
-                ${guard([this.chips, this._renderEmptySortable], () =>
+            <h3>${this.label}</h3>
+            <div class="features">
+                ${guard([this.features, this._renderEmptySortable], () =>
                     this._renderEmptySortable
                         ? ""
-                        : this.chips!.map(
-                              (chipConf, index) => html`
-                                  <div class="chip">
+                        : this.features!.map(
+                              (featureConf, index) => html`
+                                  <div class="feature">
                                       <div class="handle">
                                           <ha-icon icon="mdi:drag"></ha-icon>
                                       </div>
                                       ${html`
                                           <div class="special-row">
                                               <div>
-                                                  <span> ${this._renderChipLabel(chipConf)}</span>
+                                                  <span>
+                                                      ${this._renderFeatureLabel(featureConf)}</span
+                                                  >
                                                   <span class="secondary">
-                                                      ${this._renderChipSecondary(chipConf)}
+                                                      ${this._renderFeatureSecondary(featureConf)}
                                                   </span>
                                               </div>
                                           </div>
                                       `}
-                                      ${NON_EDITABLE_CHIPS.has(chipConf.type)
+                                      ${this.uneditable.includes(featureConf.type)
                                           ? nothing
                                           : html`
                                                 <ha-icon-button
@@ -88,7 +85,7 @@ export class ChipsCardEditorChips extends MushroomBaseElement {
                                                     )}
                                                     class="edit-icon"
                                                     .index=${index}
-                                                    @click=${this._editChip}
+                                                    @click=${this._editFeature}
                                                 >
                                                     <ha-icon icon="mdi:pencil"></ha-icon>
                                                 </ha-icon-button>
@@ -97,7 +94,7 @@ export class ChipsCardEditorChips extends MushroomBaseElement {
                                           .label=${customLocalize("editor.chip.chip-picker.clear")}
                                           class="remove-icon"
                                           .index=${index}
-                                          @click=${this._removeChip}
+                                          @click=${this._removeFeature}
                                       >
                                           <ha-icon icon="mdi:close"></ha-icon>
                                       </ha-icon-button>
@@ -106,22 +103,7 @@ export class ChipsCardEditorChips extends MushroomBaseElement {
                           )
                 )}
             </div>
-            <mushroom-select
-                .label=${customLocalize("editor.chip.chip-picker.add")}
-                @selected=${this._addChips}
-                @closed=${(e) => e.stopPropagation()}
-                fixedMenuPosition
-                naturalMenuWidth
-            >
-                ${CHIP_LIST.map(
-                    (chip) =>
-                        html`
-                            <mwc-list-item .value=${chip}>
-                                ${customLocalize(`editor.chip.chip-picker.types.${chip}`)}
-                            </mwc-list-item>
-                        `
-                )}
-            </mushroom-select>
+            <slot name="add"></slot>
         `;
     }
 
@@ -129,9 +111,9 @@ export class ChipsCardEditorChips extends MushroomBaseElement {
         super.updated(changedProps);
 
         const attachedChanged = changedProps.has("_attached");
-        const chipsChanged = changedProps.has("chips");
+        const featuresChanged = changedProps.has("features");
 
-        if (!chipsChanged && !attachedChanged) {
+        if (!featuresChanged && !attachedChanged) {
             return;
         }
 
@@ -142,20 +124,20 @@ export class ChipsCardEditorChips extends MushroomBaseElement {
             return;
         }
 
-        if (!this._sortable && this.chips) {
+        if (!this._sortable && this.features) {
             this._createSortable();
             return;
         }
 
-        if (chipsChanged) {
-            this._handleChipsChanged();
+        if (featuresChanged) {
+            this._handleFeaturesChanged();
         }
     }
 
-    private async _handleChipsChanged() {
+    private async _handleFeaturesChanged() {
         this._renderEmptySortable = true;
         await this.updateComplete;
-        const container = this.shadowRoot!.querySelector(".chips")!;
+        const container = this.shadowRoot!.querySelector(".features")!;
         while (container.lastElementChild) {
             container.removeChild(container.lastElementChild);
         }
@@ -171,99 +153,87 @@ export class ChipsCardEditorChips extends MushroomBaseElement {
             Sortable.mount(sortableImport.AutoScroll());
         }
 
-        this._sortable = new Sortable(this.shadowRoot!.querySelector(".chips"), {
+        this._sortable = new Sortable(this.shadowRoot!.querySelector(".features"), {
             animation: 150,
             fallbackClass: "sortable-fallback",
             handle: ".handle",
-            onEnd: async (evt: SortableEvent) => this._chipMoved(evt),
+            onEnd: async (evt: SortableEvent) => this._featureMoved(evt),
         });
     }
 
-    private async _addChips(ev: any): Promise<void> {
-        const target = ev.target! as EditorTarget;
-        const value = target.value as string;
-
-        if (value === "") {
-            return;
-        }
-
-        let newChip: LovelaceChipConfig;
-
-        // Check if a stub config exists
-        const elClass = getChipElementClass(value) as any;
-
-        if (elClass && elClass.getStubConfig) {
-            newChip = (await elClass.getStubConfig(this.hass)) as LovelaceChipConfig;
-        } else {
-            newChip = { type: value } as LovelaceChipConfig;
-        }
-
-        const newConfigChips = this.chips!.concat(newChip);
-        target.value = "";
-        fireEvent(this, "chips-changed", {
-            chips: newConfigChips,
-        });
-    }
-
-    private _chipMoved(ev: SortableEvent): void {
+    private _featureMoved(ev: SortableEvent): void {
         if (ev.oldIndex === ev.newIndex) {
             return;
         }
 
-        const newChips = this.chips!.concat();
+        const newFeatures = this.features!.concat();
 
-        newChips.splice(ev.newIndex!, 0, newChips.splice(ev.oldIndex!, 1)[0]);
+        newFeatures.splice(ev.newIndex!, 0, newFeatures.splice(ev.oldIndex!, 1)[0]);
 
-        fireEvent(this, "chips-changed", { chips: newChips });
+        fireEvent(this, "features-changed", { features: newFeatures, type: this.type });
     }
 
-    private _removeChip(ev: CustomEvent): void {
+    private _removeFeature(ev: CustomEvent): void {
         const index = (ev.currentTarget as any).index;
-        const newConfigChips = this.chips!.concat();
+        const newConfigFeatures = this.features!.concat();
 
-        newConfigChips.splice(index, 1);
+        newConfigFeatures.splice(index, 1);
 
-        fireEvent(this, "chips-changed", {
-            chips: newConfigChips,
+        fireEvent(this, "features-changed", {
+            features: newConfigFeatures,
+            type: this.type,
         });
     }
 
-    private _editChip(ev: CustomEvent): void {
+    private _editFeature(ev: CustomEvent): void {
         const index = (ev.currentTarget as any).index;
         fireEvent<any>(this, "edit-detail-element", {
             subElementConfig: {
                 index,
-                type: "chip",
-                elementConfig: this.chips![index],
+                type: this.type,
+                elementConfig: this.features![index],
             },
         });
     }
 
-    private _renderChipLabel(chipConf: LovelaceChipConfig): string {
+    private _renderFeatureLabel(featureConf: LovelaceChipConfig | LovelaceCardConfig): string {
         const customLocalize = setupCustomlocalize(this.hass);
-        let label = customLocalize(`editor.chip.chip-picker.types.${chipConf.type}`);
-        if (chipConf.type === "conditional" && chipConf.conditions.length > 0) {
-            const condition = chipConf.conditions[0];
-            const entity = this.getEntityName(condition.entity) ?? condition.entity;
-            label += ` - ${entity} ${
-                condition.state
-                    ? `= ${condition.state}`
-                    : condition.state_not
-                    ? `≠ ${condition.state_not}`
-                    : null
-            }`;
+        if (this.type == "chip") {
+            let label = customLocalize(`editor.chip.chip-picker.types.${featureConf.type}`);
+            if (featureConf.type === "conditional" && featureConf.conditions.length > 0) {
+                const condition = featureConf.conditions[0];
+                const entity = this.getEntityName(condition.entity) ?? condition.entity;
+                label += ` - ${entity} ${
+                    condition.state
+                        ? `= ${condition.state}`
+                        : condition.state_not
+                        ? `≠ ${condition.state_not}`
+                        : null
+                }`;
+            }
+            return label;
+        } else {
+            return featureConf.type
+                .replace("custom:", "")
+                .split("-")
+                .map((name) => name[0].toUpperCase() + name.substr(1))
+                .join(" ");
         }
-        return label;
     }
 
-    private _renderChipSecondary(chipConf: LovelaceChipConfig): string | undefined {
+    private _renderFeatureSecondary(
+        featureConf: LovelaceChipConfig | LovelaceCardConfig
+    ): string | undefined {
         const customLocalize = setupCustomlocalize(this.hass);
-        if ("entity" in chipConf && chipConf.entity) {
-            return `${this.getEntityName(chipConf.entity) ?? chipConf.entity}`;
+        if ("entity" in featureConf && featureConf.entity) {
+            return `${this.getEntityName(featureConf.entity) ?? featureConf.entity}`;
         }
-        if ("chip" in chipConf && chipConf.chip) {
-            const label = customLocalize(`editor.chip.chip-picker.types.${chipConf.chip.type}`);
-            return `${this._renderChipSecondary(chipConf.chip)} (via ${label})`;
+        if ("entities" in featureConf && featureConf.entities) {
+            return `${this.getEntitiesType(featureConf.entities)}`;
+        }
+        if ("chip" in featureConf && featureConf.chip) {
+            const label = customLocalize(`editor.chip.chip-picker.types.${featureConf.chip.type}`);
+            return `${this._renderFeatureSecondary(featureConf.chip)} (via ${label})`;
         }
         return undefined;
     }
@@ -275,12 +245,25 @@ export class ChipsCardEditorChips extends MushroomBaseElement {
         return stateObj.attributes.friendly_name;
     }
 
+    private getEntitiesType(entities: LovelaceCardConfig["entities"]): string | undefined {
+        if (!this.hass || !entities.length) return undefined;
+        const matching = entities.every(
+            (e) =>
+                (e.entity?.split(".")[0] || e.split(".")[0]) ==
+                (entities[0].entity?.split(".")[0] || entities[0].split(".")[0])
+        );
+        const domain = matching
+            ? entities[0].entity?.split(".")[0] || entities[0].split(".")[0]
+            : "Various";
+        return domain[0].toUpperCase() + domain.substr(1);
+    }
+
     static get styles(): CSSResultGroup {
         return [
             super.styles,
             sortableStyles,
             css`
-                .chip {
+                .feature {
                     display: flex;
                     align-items: center;
                 }
@@ -289,16 +272,12 @@ export class ChipsCardEditorChips extends MushroomBaseElement {
                     display: flex;
                 }
 
-                mushroom-select {
-                    width: 100%;
-                }
-
-                .chip .handle {
+                .feature .handle {
                     padding-right: 8px;
                     cursor: move;
                 }
 
-                .chip .handle > * {
+                .feature .handle > * {
                     pointer-events: none;
                 }
 

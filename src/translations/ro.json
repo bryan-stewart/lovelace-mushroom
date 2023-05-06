@@ -39,6 +39,11 @@
                     "center": "Centrat",
                     "justify": "Umplere"
                 }
+            },
+            "sub_element_editor": {
+                "chip": {
+                    "title": "Editor jeton"
+                }
             }
         },
         "card": {
@@ -134,9 +139,6 @@
             }
         },
         "chip": {
-            "sub_element_editor": {
-                "title": "Editor jeton"
-            },
             "conditional": {
                 "chip": "Jeton"
             },

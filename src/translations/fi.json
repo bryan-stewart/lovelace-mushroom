@@ -39,6 +39,11 @@
                     "center": "Keskitä",
                     "justify": "Sovita"
                 }
+            },
+            "sub_element_editor": {
+                "chip": {
+                    "title": "Merkkieditori"
+                }
             }
         },
         "card": {
@@ -129,9 +134,6 @@
             }
         },
         "chip": {
-            "sub_element_editor": {
-                "title": "Merkkieditori"
-            },
             "conditional": {
                 "chip": "Merkki"
             },

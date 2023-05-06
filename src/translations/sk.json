@@ -39,6 +39,11 @@
                     "center": "Stred",
                     "justify": "Vyplniť"
                 }
+            },
+            "sub_element_editor": {
+                "chip": {
+                    "title": "Editor štítkov"
+                }
             }
         },
         "card": {
@@ -134,9 +139,6 @@
             }
         },
         "chip": {
-            "sub_element_editor": {
-                "title": "Editor štítkov"
-            },
             "conditional": {
                 "chip": "Štítok"
             },

@@ -39,6 +39,11 @@
                     "center": "توسيط",
                     "justify": "مساواة"
                 }
+            },
+            "sub_element_editor": {
+                "chip": {
+                    "title": "محرر الرقاقة"
+                }
             }
         },
         "card": {
@@ -133,9 +138,6 @@
             }
         },
         "chip": {
-            "sub_element_editor": {
-                "title": "محرر الرقاقة"
-            },
             "conditional": {
                 "chip": "رقاقة"
             },

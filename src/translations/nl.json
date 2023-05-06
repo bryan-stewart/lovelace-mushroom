@@ -39,6 +39,11 @@
                     "center": "Midden",
                     "justify": "Uitlijnen "
                 }
+            },
+            "sub_element_editor": {
+                "chip": {
+                    "title": "Chip editor"
+                }
             }
         },
         "card": {
@@ -147,9 +152,6 @@
             }
         },
         "chip": {
-            "sub_element_editor": {
-                "title": "Chip editor"
-            },
             "conditional": {
                 "chip": "Chip"
             },

@@ -39,6 +39,11 @@
                     "center": "Centrer",
                     "justify": "Lige margener"
                 }
+            },
+            "sub_element_editor": {
+                "chip": {
+                    "title": "Chip-editor"
+                }
             }
         },
         "card": {
@@ -133,9 +138,6 @@
             }
         },
         "chip": {
-            "sub_element_editor": {
-                "title": "Chip-editor"
-            },
             "conditional": {
                 "chip": "Chip"
             },

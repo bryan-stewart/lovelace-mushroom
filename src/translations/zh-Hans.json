@@ -30,6 +30,11 @@
                     "center": "居中对齐",
                     "justify": "两端对齐"
                 }
+            },
+            "sub_element_editor": {
+                "chip": {
+                    "title": "Chip 编辑"
+                }
             }
         },
         "card": {
@@ -74,9 +79,6 @@
             }
         },
         "chip": {
-            "sub_element_editor": {
-                "title": "Chip 编辑"
-            },
             "conditional": {
                 "chip": "Chip"
             },

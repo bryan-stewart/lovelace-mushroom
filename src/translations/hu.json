@@ -39,6 +39,11 @@
                     "center": "Közepe",
                     "justify": "Sorkizárt"
                 }
+            },
+            "sub_element_editor": {
+                "chip": {
+                    "title": "Chip szerkesztő"
+                }
             }
         },
         "card": {
@@ -147,9 +152,6 @@
             }
         },
         "chip": {
-            "sub_element_editor": {
-                "title": "Chip szerkesztő"
-            },
             "conditional": {
                 "chip": "Chip"
             },

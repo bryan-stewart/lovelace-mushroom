@@ -1,7 +1,7 @@
 import { array, assign, boolean, define, number, object, optional, string, union } from "superstruct";
 import { lovelaceCardConfigStruct } from "../../shared/config/lovelace-card-config";
 import { LovelaceCardConfig } from "../../ha";
-import { EntityCardConfig } from "../entity-card/entity-card-config";
+import { EntityCardConfig, entityCardConfigStruct } from "../entity-card/entity-card-config";
 import { templateCardConfigStruct } from "../template-card/template-card-config";
 
 const TABS = [
@@ -17,6 +17,7 @@ export type TabbedCardConfig = LovelaceCardConfig & {
 
 export const tabbedCardTabConfigStruct = assign(
     templateCardConfigStruct,
+    entityCardConfigStruct,
     object({
         type: define('Compatible Card', (type: any) => TABS.includes(type)),
         icon_color: optional(string()),

@@ -39,6 +39,11 @@
                     "center": "Centre",
                     "justify": "Justifica"
                 }
+            },
+            "sub_element_editor": {
+                "chip": {
+                    "title": "Editor de xips"
+                }
             }
         },
         "card": {
@@ -137,9 +142,6 @@
             }
         },
         "chip": {
-            "sub_element_editor": {
-                "title": "Editor de xips"
-            },
             "conditional": {
                 "chip": "Xip"
             },
