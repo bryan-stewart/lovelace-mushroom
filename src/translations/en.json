@@ -28,7 +28,8 @@
                 "values": {
                     "default": "Default layout",
                     "vertical": "Vertical layout",
-                    "horizontal": "Horizontal layout"
+                    "horizontal": "Horizontal layout",
+                    "reverse": "Reversed layout"
                 }
             },
             "alignment_picker": {

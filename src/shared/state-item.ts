@@ -14,6 +14,7 @@ export class StateItem extends LitElement {
                 class=${classMap({
                     container: true,
                     vertical: this.appearance?.layout === "vertical",
+                    reversed: this.appearance?.layout === "reverse",
                 })}
             >
                 ${this.appearance?.icon_type !== "none"
@@ -72,6 +73,13 @@ export class StateItem extends LitElement {
             .container.vertical {
                 flex-direction: column;
             }
+            .container.reversed {
+                flex-direction: row-reverse;
+            }
+            .container.reversed > *:not(:last-child) {
+                margin-right: 0;
+                margin-left: var(--spacing);
+            }
             .container.vertical > *:not(:last-child) {
                 margin-bottom: var(--spacing);
                 margin-right: 0;
@@ -80,6 +88,9 @@ export class StateItem extends LitElement {
             :host([rtl]) .container.vertical > *:not(:last-child) {
                 margin-right: initial;
                 margin-left: initial;
+            }
+            .container.reversed .info {
+                text-align: right;
             }
             .container.vertical .info {
                 text-align: center;

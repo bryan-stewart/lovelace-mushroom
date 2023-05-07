@@ -4,13 +4,14 @@ import { HomeAssistant } from "../../ha";
 import setupCustomlocalize from "../../localize";
 import "./../form/mushroom-select";
 
-const LAYOUTS = ["default", "horizontal", "vertical"] as const;
+const LAYOUTS = ["default", "horizontal", "reverse", "vertical"] as const;
 type Layout = (typeof LAYOUTS)[number];
 
 const ICONS: Record<Layout, string> = {
     default: "mdi:card-text-outline",
     vertical: "mdi:focus-field-vertical",
     horizontal: "mdi:focus-field-horizontal",
+    reverse: "mdi:focus-field-horizontal",
 };
 
 @customElement("mushroom-layout-picker")

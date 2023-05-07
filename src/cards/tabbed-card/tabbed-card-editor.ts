@@ -216,7 +216,6 @@ export class TabbedCardEditor extends MushroomBaseElement implements LovelaceCar
         if (!this._config || !this.hass) {
             return;
         }
-        console.log(ev);
 
         const configValue = this._subElementEditorConfig?.type;
         const value = ev.detail.config;
