@@ -51,8 +51,8 @@ export class RoomCard extends MushroomBaseCard implements LovelaceCard {
             type: `custom:${ROOM_CARD_NAME}`,
             entity: entities[0],
             tap_action: {
-                action: 'dropdown',
-                dropdown: 'close'
+                action: "dropdown",
+                dropdown: "close",
             },
             dropdowns: [
                 {
@@ -70,17 +70,17 @@ export class RoomCard extends MushroomBaseCard implements LovelaceCard {
                         type: "entity",
                         entity: entities[6],
                         tap_action: {
-                            action: 'dropdown',
-                            dropdown: '1'
-                        }
+                            action: "dropdown",
+                            dropdown: "1",
+                        },
                     },
                     {
                         type: "entity",
                         entity: entities[7],
                         tap_action: {
-                            action: 'dropdown',
-                            dropdown: '2'
-                        }
+                            action: "dropdown",
+                            dropdown: "2",
+                        },
                     },
                 ],
                 alignment: "end",
@@ -90,7 +90,7 @@ export class RoomCard extends MushroomBaseCard implements LovelaceCard {
 
     @state() private _config?: RoomCardConfig;
     @state() private _dropdown?: string;
-    @state() private _chips?: TemplateResult;
+    @state() private _chips?: LovelaceCard;
 
     getCardSize(): number | Promise<number> {
         return 1;
@@ -114,6 +114,11 @@ export class RoomCard extends MushroomBaseCard implements LovelaceCard {
         if (changedProps.has("_config")) {
             this._renderChips();
         }
+        if (changedProps.has("hass")) {
+            if (this._chips) {
+                this._chips.hass = this.hass
+            }
+        }
     }
 
     private _handleAction(ev: ActionHandlerEvent) {
@@ -135,9 +140,10 @@ export class RoomCard extends MushroomBaseCard implements LovelaceCard {
         }
     }
 
-    private _renderChips() {
+    private _renderChips(): TemplateResult | undefined {
         if (this._config?.chips?.chips?.length) {
             const config = {
+                type: 'custom:mushroom-chips-card',
                 ...this._config.chips,
                 color: this._config.chips.color || "lightblue",
                 chips: this._config.chips.chips.map((n) => ({
@@ -145,17 +151,23 @@ export class RoomCard extends MushroomBaseCard implements LovelaceCard {
                 })),
             };
 
-            this._chips = html`
-                <div class="chips-container" style="background-color: ${config.color}">
-                    <mushroom-chips-card
-                        .hass=${this.hass}
-                        ._config=${config}
-                        @dropdown-changed=${this._handleDropdown}
-                    ></mushroom-chips-card>
+            if (!this._chips) {
+                this._chips = this.renderCard(config);
+            }
+
+            return html`
+                <div
+                    class="chips-container"
+                    style="background-color: ${config.color}"
+                    @dropdown-changed=${this._handleDropdown}
+                >
+                    ${this._chips}
                 </div>
             `;
+
         } else {
-            this._chips = undefined
+            this._chips = undefined;
+            return;
         }
     }
 
@@ -207,7 +219,7 @@ export class RoomCard extends MushroomBaseCard implements LovelaceCard {
                                   <div class="divider"></div>
                                   <div class="dropdown-container">${this.renderCard(dropdown)}</div>
                               `}
-                        ${this._chips}
+                        ${this._renderChips()}
                     </div>
                 </mushroom-card>
             </ha-card>
@@ -233,15 +245,15 @@ export class RoomCard extends MushroomBaseCard implements LovelaceCard {
         `;
     }
 
-    private renderCard(cardConfig: LovelaceCardConfig): TemplateResult {
+    private renderCard(cardConfig: LovelaceCardConfig): LovelaceCard | undefined {
         const element = createCardElement(cardConfig);
         if (!element) {
-            return html``;
+            return;
         }
         if (this.hass) {
             element.hass = this.hass;
         }
-        return html`${element}`;
+        return element;
     }
 
     static get styles(): CSSResultGroup {
